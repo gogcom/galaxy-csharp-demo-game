@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 6f50a846f859fbf489195f448d074915
+timeCreated: 1512058392
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - popUpWithButton: {fileID: 1056024716525726, guid: 88d73fab67b188a458a118b4fbc49d59,
+      type: 2}
+  - popUpWaitingWithButton: {fileID: 1261833822387696, guid: 57beca134d3c83543abdb17e0f270186,
+      type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

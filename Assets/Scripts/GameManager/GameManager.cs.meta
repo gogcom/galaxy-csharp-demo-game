@@ -1,0 +1,30 @@
+fileFormatVersion: 2
+guid: 60db66aee933a15479da6dd51eaf933c
+timeCreated: 1496738441
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - whiteBallPrefab: {fileID: 1717083683365526, guid: 3639a563240020448b9ecdc8a7faebdb,
+      type: 2}
+  - blackBallPrefab: {fileID: 1535821139345894, guid: 70e22f366389f16418850776b166fd20,
+      type: 2}
+  - blueBallPrefab: {fileID: 1117836262052806, guid: 426af4c953a8ee34b8f23d832d866748,
+      type: 2}
+  - redBallPrefab: {fileID: 1322959193294826, guid: 77b021ec286cf3f43af15e3a76183eee,
+      type: 2}
+  - playerPrefab: {fileID: 1803307562128308, guid: 6e59b23718f54da44805c28af0605af4,
+      type: 2}
+  - playerScoreText: {instanceID: 0}
+  - playerAssignedColor: {instanceID: 0}
+  - redBallsText: {instanceID: 0}
+  - blueBallsText: {instanceID: 0}
+  - thrustSlider: {instanceID: 0}
+  - playerStatus: {instanceID: 0}
+  - playerController: {instanceID: 0}
+  - player: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
