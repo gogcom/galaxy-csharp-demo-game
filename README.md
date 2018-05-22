@@ -38,6 +38,7 @@ Assets -> Import Package -> Custom Package
 * **Małgorzata Płachetka** - Design, code, documentation.
 * **Mateusz Siłaczewski** - GOG Galaxy SDK Integration QA.
 * **Grzegorz Dominiak** - Gameplay QA.
+* **Aliaksei Paulouski** - GOG Galaxy SDK Integration code review.
 
 ## License
 
