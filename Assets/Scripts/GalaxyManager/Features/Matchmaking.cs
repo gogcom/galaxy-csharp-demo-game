@@ -174,20 +174,18 @@ public class Matchmaking : MonoBehaviour
     }
 
     // Sets lobby 'lobbyID' data 'key' to 'value'
-    public bool SetLobbyData(GalaxyID lobbyID, string key, string value)
+    public void SetLobbyData(GalaxyID lobbyID, string key, string value)
     {
-        bool dataReceived = false;
         Debug.Log("Trying to set lobby " + lobbyID + " data " + key + " to " + value);
         try
         {
-            dataReceived = GalaxyInstance.Matchmaking().SetLobbyData(lobbyID, key, value);
+            GalaxyInstance.Matchmaking().SetLobbyData(lobbyID, key, value);
             Debug.Log("Lobby " + lobbyID + " data " + key + " set to " + value);
         }
         catch (GalaxyInstance.Error e)
         {
             Debug.LogWarning("Could not set lobby " + lobbyID + " data " + key + " to " + value + " for reason: " + e);
         }
-        return dataReceived;
     }
 
     // Gets the GalaxyID of the lobby owner
