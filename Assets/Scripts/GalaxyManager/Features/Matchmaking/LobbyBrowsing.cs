@@ -54,14 +54,14 @@ public class LobbyBrowsing : MonoBehaviour
         Matchmaking matchmaking = GalaxyManager.Instance.Matchmaking;
         List<GalaxyID> lobbyList = GalaxyManager.Instance.Matchmaking.lobbyList;
 
-        public override void OnLobbyList(uint count, bool ioFailure)
+        public override void OnLobbyList(uint count, LobbyListResult result)
         {
-            if (!ioFailure)
+            if (result == LobbyListResult.LOBBY_LIST_RESULT_SUCCESS)
             {
                 LobbyListRetrieved(count);
             }
             else {
-                Debug.LogWarning("OnLobbyList failure");
+                Debug.LogWarning("OnLobbyList failure reason: " + result);
             }
         }
 
