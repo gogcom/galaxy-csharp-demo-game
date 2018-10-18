@@ -40,36 +40,40 @@ public class Storage : MonoBehaviour {
 
 	#region Methods
 
-	/* This method reads a specified file from your hard-drive and moves it to local storage
-	In normal scenarios you can use Galaxy SDK FileWrite method to write bytes in local storage */
-	public void MoveFileToLocalStorage (string pathToInputFile)
+	/* This method reads a specified file from your hard-drive and copies it to local storage.
+	This is an example, as in normal scenarios you can use Galaxy SDK FileWrite method to write
+	bytes from memory to a file in local storage, ie. create new files not copy existing ones. */
+	public void CopyFileToLocalStorage (string absoluteInputPath)
 	{
 		string fileName = null;
 		byte[] data = null;
 
-		if (File.Exists(pathToInputFile))
+		if (File.Exists(absoluteInputPath))
 		{
-			fileName = Path.GetFileName(pathToInputFile);
-			data = File.ReadAllBytes(pathToInputFile);
+			fileName = Path.GetFileName(absoluteInputPath);
+			data = File.ReadAllBytes(absoluteInputPath);
 		}
 		else
 		{
-			Debug.Log("File " + pathToInputFile + " does not exist");
+			Debug.Log("File " + absoluteInputPath + " does not exist");
 			return;
 		}
 		
 		try
 		{
-			Debug.Log("Writing file " + fileName + " to local storage");
+			Debug.Log("Writing file " + absoluteInputPath + " to local storage.");
 			GalaxyInstance.Storage().FileWrite(fileName, data, (uint)data.Length);
 		} 
 		catch (GalaxyInstance.Error e)
 		{
-			Debug.LogWarning ("Could not write file " + fileName + " to local storage for reason: " + e);
+			Debug.LogWarning ("Could not write file " + absoluteInputPath + " to local storage for reason: " + e);
 		}
 	}
 
-	/* Removes specified file from local storage */
+	/* Removes specified file from local storage. The file needs to be in your local storage 
+	when this method is used. If the file is removed when the game is running this information
+	will be shared with cloud storage when the game is closed. Files removed manually when 
+	the game is not running will be downloaded again when the game is launched. */
 	public void RemoveFileFromLocalStorage (string fileName)
 	{
 		try
@@ -89,7 +93,9 @@ public class Storage : MonoBehaviour {
 		}
 	}
 
-	/* Uploads specified file from local storage to online storage */
+	/* Uploads specified file from local storage to online storage. Uploaded file will be then
+	available in cloud, meaning it can be shared with other users using SharedFileID (obtained from
+	FileShareListener), and will be downloaded on all machines used by this user. */
 	public void ShareFileFromLocalStorage (string fileName)
 	{
 		try
@@ -103,7 +109,8 @@ public class Storage : MonoBehaviour {
 		}
 	}
 
-	/* Share all files present in the local storage */
+	/* Share all files present in the local storage. Does the same thing as ShareFileFromLocalStorage, 
+	but for all files present in local storage. */
 	public void ShareAllFilesFromLocalStorage ()
 	{
 		uint fileCount = GalaxyInstance.Storage().GetFileCount();
@@ -123,7 +130,8 @@ public class Storage : MonoBehaviour {
 		}
 	}
 
-	/* Lists all files present in the local storage */
+	/* Lists all files present in the local storage. Files in Cloud Storage that are not present in
+	the local storage will NOT be listed. */
 	public string[] ListAllFilesFromOnlineStorage ()
 	{
 		uint fileCount = 0;
@@ -146,10 +154,42 @@ public class Storage : MonoBehaviour {
 		return null;
 	}
 
-	/* Downloads a file share */
-	public void DownloadSharedFileFromUser (string fileName, GalaxyID userID)
+	/* Download shared file using it's SharedFileID */
+	public void DownloadSharedFile(ulong sharedFileID)
 	{
-		specificUserDataListener.fileName = fileName;
+		if (sharedFileID == 0) return;
+		try
+		{
+			GalaxyInstance.Storage().DownloadSharedFile(sharedFileID);
+		}
+		catch (GalaxyInstance.Error e)
+		{
+			Debug.LogWarning("Could not download shared file for reason " + e);
+		}
+	}
+
+	/* Gets a SharedFileID for a file with a specified name. This uses the User
+	interface to read and return a value of a specified user data key. */
+	public ulong GetSharedFileIDFromUser(GalaxyID userID, string fileName)
+	{
+		ulong sharedFileID = 0;
+		if (fileName == null) return sharedFileID;
+		try
+		{
+			sharedFileID = ulong.Parse(GalaxyInstance.User().GetUserData(fileName, userID));
+		}
+		catch (GalaxyInstance.Error e)
+		{
+			Debug.Log("Could not get SharedFileID for file " + fileName + " for user " + userID.ToString() + " for reason " + e);
+		}
+		fileName = null;
+		return sharedFileID;
+	}
+
+	/* Downloads a file share */
+	public void DownloadSharedFileFromUser(GalaxyID userID, string fileName)
+	{
+		specificUserDataListener.sharedFileID = GetSharedFileIDFromUser(userID, fileName);
 		try
 		{
 			GalaxyInstance.User().RequestUserData(userID);
@@ -163,47 +203,12 @@ public class Storage : MonoBehaviour {
 	#endregion
 
 	#region Listeners
-	public class SpecificUserDataListener : GlobalSpecificUserDataListener
-	{
-		public string fileName = null;
-		public override void OnSpecificUserDataUpdated(GalaxyID userID)
-		{
-			Debug.Log("User " + userID + " data received");
-			DownloadSharedFile(GetSharedFileIDFromUser(userID), userID);
-		}
 
-		public ulong GetSharedFileIDFromUser (GalaxyID userID)
-		{
-			ulong sharedFileID = 0;
-			if (fileName == null) return sharedFileID;
-			try
-			{
-				sharedFileID = ulong.Parse(GalaxyInstance.User().GetUserData(fileName, userID));
-			}
-			catch (GalaxyInstance.Error e)
-			{
-				Debug.Log("Could not get SharedFileID for file " + fileName + " for user " + userID.ToString() + " for reason " + e);
-			}
-			fileName = null;
-			return sharedFileID;
-		}
-
-		public void DownloadSharedFile (ulong sharedFileID, GalaxyID userID)
-		{
-			if (sharedFileID == 0) return;
-			try
-			{
-				GalaxyManager.Instance.Storage.sharedFileDownloadListener.userID = userID.ToString();
-				GalaxyInstance.Storage().DownloadSharedFile(sharedFileID);
-			}
-			catch (GalaxyInstance.Error e)
-			{
-				Debug.LogWarning("Could not download shared file for reason " + e);
-			}
-		}
-
-	}
-
+	/* This listener waits for a result of the FileShare method. OnFileShareSuccess will fire
+	when the file was successfully shared, in such case a sharedFileID will also be provided.
+	sharedFileID can be used to share a file with other users. We save the sharedFileID as 
+	user data using the User interface SetUserData method, so other users can retrieve this data
+	without any action required from us. */
 	public class FileShareListener : GlobalFileShareListener
 	{
 		public override void OnFileShareSuccess(string fileName, ulong sharedFileID)
@@ -230,6 +235,9 @@ public class Storage : MonoBehaviour {
 		}
 	}
 
+	/* Listener for the event of a file being downloaded. We use it to read the file, write it in
+	local storage, appending the file with the GalaxyID of a user the file was downloaded from, 
+	and then closing the file to free up memory.*/
 	public class SharedFileDownloadListener : GlobalSharedFileDownloadListener 
 	{
 		public string userID = null;
@@ -271,5 +279,21 @@ public class Storage : MonoBehaviour {
 			}
 		}
 	}
+
+	/* This listener is used in pair with GetSharedFileIDFromUser. 
+	We ask backends for user data to retrieve sharedFileID */
+	public class SpecificUserDataListener : GlobalSpecificUserDataListener
+	{
+		public ulong sharedFileID = 0;
+		private Storage storage = GalaxyManager.Instance.Storage;
+
+		public override void OnSpecificUserDataUpdated(GalaxyID userID)
+		{
+			Debug.Log("User " + userID + " data received");
+			storage.DownloadSharedFile(sharedFileID);
+		}
+
+	}
+
 	#endregion
 }
