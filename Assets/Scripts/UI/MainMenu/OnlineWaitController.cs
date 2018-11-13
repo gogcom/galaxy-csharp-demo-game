@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using Galaxy.Api;
 
-
 public class OnlineWaitController : MonoBehaviour
 {
 
@@ -15,12 +14,6 @@ public class OnlineWaitController : MonoBehaviour
 
     void OnEnable()
     {
-        GalaxyManager.Instance.Matchmaking.ShutdownLobbyCreation();
-        GalaxyManager.Instance.Matchmaking.ShutdownLobbyBrowsing();
-
-        GalaxyManager.Instance.Matchmaking.StartLobbyManagementMainMenu();
-        GalaxyManager.Instance.Matchmaking.StartLobbyChat();
-
         lobbyID = GalaxyManager.Instance.Matchmaking.CurrentLobbyID;
         GalaxyManager.Instance.Friends.SetRichPresence("status", "In online lobby");
         GalaxyManager.Instance.Friends.SetRichPresence("connect", "--JoinLobby=" + lobbyID);
