@@ -141,7 +141,6 @@ public class Invitations : MonoBehaviour
     {
         Debug.Log("Joining LobbyID " + pendingLobbyID);
         GalaxyManager.Instance.StartMatchmaking();
-        GalaxyManager.Instance.Matchmaking.StartLobbyBrowsing();
         GalaxyManager.Instance.Matchmaking.JoinLobby(pendingLobbyID);
         GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.OnlineJoining);
         pendingLobbyID = null;

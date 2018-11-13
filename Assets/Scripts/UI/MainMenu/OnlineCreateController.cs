@@ -8,11 +8,6 @@ public class OnlineCreateController : MonoBehaviour
     public InputField gameName;
     public Text message;
 
-    void OnEnable()
-    {
-        GalaxyManager.Instance.Matchmaking.StartLobbyCreation();
-    }
-
     // Creates lobby
     public void CreateLobby()
     {

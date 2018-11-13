@@ -21,7 +21,7 @@ public class ChatMenuController : MonoBehaviour
 
     void Update()
     {
-        lobbyMessageHistory = GalaxyManager.Instance.Matchmaking.LobbyChat.lobbyMessageHistory;
+        lobbyMessageHistory = GalaxyManager.Instance.Matchmaking.lobbyMessageHistory;
         if (lobbyMessageHistory.Count > messagesEntriesList.Count)
         {
             DisplayChatMessages();

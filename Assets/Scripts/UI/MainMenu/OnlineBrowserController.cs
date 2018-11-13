@@ -12,7 +12,6 @@ public class OnlineBrowserController : MonoBehaviour
 
     void OnEnable()
     {
-        GalaxyManager.Instance.Matchmaking.StartLobbyBrowsing();
         RequestLobbyList(false);
     }
 
