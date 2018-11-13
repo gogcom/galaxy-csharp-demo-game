@@ -20,6 +20,7 @@ public class GalaxyManager : MonoBehaviour
     public Networking Networking;
     public Matchmaking Matchmaking;
     public Invitations Invitations;
+    public Storage Storage;
     private static GalaxyID myGalaxyID;
     public GalaxyID MyGalaxyID { get { return myGalaxyID; } }
     // Galaxy initiation result
@@ -195,6 +196,16 @@ public class GalaxyManager : MonoBehaviour
         if (Networking != null) Destroy(Networking);
     }
 
+    public void StartStorage()
+    {
+        if (Storage == null) Storage = gameObject.AddComponent<Storage>();
+    }
+
+    public void ShutdownStorage()
+    {
+        if (Storage != null) Destroy(Storage);
+    }
+
     public void ShutdownAllFeatureClasses()
     {
         ShutdownStatsAndAchievements();
@@ -203,6 +214,7 @@ public class GalaxyManager : MonoBehaviour
         ShutdownNetworking();
         ShutdownInvitations();
         ShutdownMatchmaking();
+        ShutdownStorage();
     }
 
     /* Initializes GalaxyPeer instance
@@ -339,6 +351,7 @@ public class GalaxyManager : MonoBehaviour
             {
                 GalaxyManager.Instance.StartLeaderboards();
                 GalaxyManager.Instance.StartInvitations();
+                GalaxyManager.Instance.StartStorage();
             }
 
         }

@@ -34,9 +34,10 @@ public class DebugController : MonoBehaviour {
 		if (statisticsWindowEnabled && statisticsIntApiKeyWindowEnabled) StatisticsIntApiKeysWindow();
 		if (leaderboardsWindowEnabled) leaderboardsWindowRect = GUI.Window(3,leaderboardsWindowRect,LeaderboardsWindow,"Leaderboards");
 		if (leaderboardsWindowEnabled && leaderboardsApiKeyWindowEnabled) LeaderboardsApiKeysWindow();
-		if (userStatusConsoleWindowEnabled) userStatusWindowRect = GUI.Window(4,userStatusWindowRect,UserStatusWindow,"User status");
-		if (gameWindowEnabled) gameWindowRect = GUI.Window(5,gameWindowRect,GameWindow, "Game");
-		if (debugConsoleWindowEnabled) debugConsoleWindowRect = GUI.Window(6,debugConsoleWindowRect,DebugConsole,"Console");
+		if (userStatusWindowEnabled) userStatusWindowRect = GUI.Window(4,userStatusWindowRect,UserStatusWindow,"User status");
+		if (storageWindowEnabled) storageWindowRect = GUI.Window(5,storageWindowRect,StorageWindow,"Storage");
+		if (gameWindowEnabled) gameWindowRect = GUI.Window(6,gameWindowRect,GameWindow,"Game");
+		if (debugConsoleWindowEnabled) debugConsoleWindowRect = GUI.Window(7,debugConsoleWindowRect,DebugConsole,"Console");
 	}
 
 	void OnDestroy()
@@ -80,11 +81,13 @@ public class DebugController : MonoBehaviour {
 
 		if (GUI.Button(new Rect(300,0,100,20),"Leaderboards")) leaderboardsWindowEnabled = !leaderboardsWindowEnabled;
 
-		if (GUI.Button(new Rect(400,0,100,20),"User status")) userStatusConsoleWindowEnabled = !userStatusConsoleWindowEnabled;
+		if (GUI.Button(new Rect(400,0,100,20),"User status")) userStatusWindowEnabled = !userStatusWindowEnabled;
+		
+		if (GUI.Button(new Rect(500,0,100,20),"Storage")) storageWindowEnabled = !storageWindowEnabled;
 
-		if (GUI.Button(new Rect(500,0,100,20),"Game")) gameWindowEnabled = !gameWindowEnabled;
+		if (GUI.Button(new Rect(600,0,100,20),"Game")) gameWindowEnabled = !gameWindowEnabled;
 
-		if (GUI.Button(new Rect(600,0,100,20),"Console")) debugConsoleWindowEnabled = !debugConsoleWindowEnabled;
+		if (GUI.Button(new Rect(700,0,100,20),"Console")) debugConsoleWindowEnabled = !debugConsoleWindowEnabled;
 
 		if (GUI.Button(new Rect(Screen.width-20,0,20,20),"X")) topBarEnabled = false;
 
@@ -336,11 +339,11 @@ public class DebugController : MonoBehaviour {
 	/********************
 	*	USER STATUS		*
 	********************/
-	bool userStatusConsoleWindowEnabled = false;
+	bool userStatusWindowEnabled = false;
 	Rect userStatusWindowRect = new Rect(400,20,170,105);
 	private void UserStatusWindow (int windowID) 
 	{
-		if (GUI.Button (new Rect(153,2,15,15),"X")) userStatusConsoleWindowEnabled = false;
+		if (GUI.Button (new Rect(153,2,15,15),"X")) userStatusWindowEnabled = false;
 
 		GUI.Label(new Rect(5,20,160,20),"Init: " + GalaxyManager.Instance.GalaxyFullyInitialized.ToString());
 		GUI.Label(new Rect(5,40,160,20),"SignedIn: " + GalaxyManager.Instance.IsSignedIn(true).ToString());
@@ -350,11 +353,92 @@ public class DebugController : MonoBehaviour {
 		GUI.DragWindow();
 	}
 
+	/****************
+	*	STORAGE		*
+	****************/
+	bool storageWindowEnabled = false;
+	Rect storageWindowRect = new Rect(500,20,335,195);
+	string inputFileWriteTarget = "absolutInputPath";
+	string fileRemoveTarget = "localStorageRelativePath";
+	string fileNameShare = "localStorageRelativePath";
+	string fileNameDownload = "fileName";
+	string userIDDownload = "userID";
+	string fileSharedID = "sharedFileID";
+
+	private void StorageWindow (int windowID) 
+	{
+		if (GUI.Button (new Rect(318,2,15,15),"X")) storageWindowEnabled = false;
+
+		if (GUI.Button (new Rect(5,20,160,20), "FileWrite")) GalaxyManager.Instance.Storage.CopyFileToLocalStorage(inputFileWriteTarget);
+		inputFileWriteTarget = GUI.TextField(new Rect(170,20,160,20), inputFileWriteTarget);
+
+		if (GUI.Button (new Rect(5,45,160,20), "FileRemove")) GalaxyManager.Instance.Storage.RemoveFileFromLocalStorage(fileRemoveTarget);
+		fileRemoveTarget = GUI.TextField(new Rect(170,45,160,20), fileRemoveTarget);
+
+		if (GUI.Button (new Rect(5,70,160,20), "FileShare")) GalaxyManager.Instance.Storage.ShareFileFromLocalStorage(fileNameShare);
+		fileNameShare = GUI.TextField(new Rect(170,70,160,20), fileNameShare);
+
+		if (GUI.Button (new Rect(5,95,320,20), "FileShareAll")) GalaxyManager.Instance.Storage.ShareAllFilesFromLocalStorage();
+
+		if (GUI.Button (new Rect(5,120,160,20), "FileDownloadBySharedFileID")) DownloadFileBySharedID(fileSharedID);
+		fileSharedID = GUI.TextField(new Rect(170,120,160,20),fileSharedID);
+
+		if (GUI.Button (new Rect(5,145,160,20), "FileDownloadByNameAndUser")) DownloadFileFromUser(fileNameDownload,userIDDownload);
+		fileNameDownload = GUI.TextField(new Rect(170,145,77.5f,20),fileNameDownload);
+		userIDDownload = GUI.TextField(new Rect(252.5f,145,77.5f,20),userIDDownload);
+
+		if (GUI.Button (new Rect(5,170,320,20), "FileListAll")) 
+		{
+			string[] fileListArray;
+			string fileListString;
+
+			fileListArray = GalaxyManager.Instance.Storage.ListAllFilesFromOnlineStorage();
+			fileListString= "";
+
+			for(int i = 0; i < fileListArray.Length; i++) 
+			{
+				if (i == 0) 
+				{
+					fileListString = string.Concat("1. " + fileListArray[i]);
+				} else {
+					fileListString = string.Concat(fileListString,"\n",(i+1).ToString(),". ",fileListArray[i]);
+				}
+			}
+			Debug.Log("File list:\n"+fileListString);
+		}
+
+		if (GUI.Button(new Rect(5,195,320,20),"Open Local Storage Dir")) 
+		{
+#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
+			string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + "/GOG.com/Galaxy/Applications/50225266424144145/Storage/Shared/Files";
+			System.Diagnostics.Process.Start(path);
+#elif (UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX)
+			Debug.Log("What is the path on macOS??");
+#endif
+		}
+
+		GUI.DragWindow();
+	}
+
+	private void DownloadFileBySharedID(string sharedFileIDString) 
+	{
+		ulong sharedFileIDUlong;
+		sharedFileIDUlong = ulong.Parse(sharedFileIDString);
+		GalaxyManager.Instance.Storage.DownloadSharedFile(sharedFileIDUlong);
+	}
+
+	private void DownloadFileFromUser(string fileName, string stringGalaxyID) 
+	{
+		Galaxy.Api.GalaxyID realGalaxyID;
+		realGalaxyID = new Galaxy.Api.GalaxyID(ulong.Parse(stringGalaxyID));
+		GalaxyManager.Instance.Storage.DownloadSharedFileFromUser(realGalaxyID,fileName);
+	}
+
 	/************
 	*	GAME	*
 	*************/
 	bool gameWindowEnabled = false;
-	Rect gameWindowRect = new Rect(500,20,170,225);
+	Rect gameWindowRect = new Rect(600,20,170,225);
 
 	private void GameWindow (int windowID) 
 	{
