@@ -8,4 +8,5 @@ public class MainController : MonoBehaviour
 	{
 		GalaxyManager.Instance.ShutdownMatchmaking();
 	}
+	
 }

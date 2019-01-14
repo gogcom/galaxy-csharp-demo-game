@@ -15,6 +15,7 @@ public class OnlineWaitController : MonoBehaviour
     void OnEnable()
     {
         lobbyID = GalaxyManager.Instance.Matchmaking.CurrentLobbyID;
+        GalaxyManager.Instance.Matchmaking.StartLobbyManagmentMainMenu();
         GalaxyManager.Instance.Friends.SetRichPresence("status", "In online lobby");
         GalaxyManager.Instance.Friends.SetRichPresence("connect", "--JoinLobby=" + lobbyID);
     }
@@ -76,7 +77,7 @@ public class OnlineWaitController : MonoBehaviour
 
     public void LeaveLobby()
     {
-        if (GalaxyManager.Instance.Matchmaking.CurrentLobbyID != null) GalaxyManager.Instance.Matchmaking.LeaveLobby();
+        GalaxyManager.Instance.Matchmaking.LeaveLobby();
         GalaxyManager.Instance.Friends.SetRichPresence("status", "In main menu");
     }
 
