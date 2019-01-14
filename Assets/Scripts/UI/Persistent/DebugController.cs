@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class DebugController : MonoBehaviour {
@@ -37,7 +38,8 @@ public class DebugController : MonoBehaviour {
 		if (userStatusWindowEnabled) userStatusWindowRect = GUI.Window(4,userStatusWindowRect,UserStatusWindow,"User status");
 		if (storageWindowEnabled) storageWindowRect = GUI.Window(5,storageWindowRect,StorageWindow,"Storage");
 		if (gameWindowEnabled) gameWindowRect = GUI.Window(6,gameWindowRect,GameWindow,"Game");
-		if (debugConsoleWindowEnabled) debugConsoleWindowRect = GUI.Window(7,debugConsoleWindowRect,DebugConsole,"Console");
+		if (argumentsWindowEnabled) argumentsWindowRect = GUI.Window(7,argumentsWindowRect,ArgumentsWindow,"Arguments");
+		if (debugConsoleWindowEnabled) debugConsoleWindowRect = GUI.Window(8,debugConsoleWindowRect,DebugConsole,"Console");
 	}
 
 	void OnDestroy()
@@ -74,21 +76,14 @@ public class DebugController : MonoBehaviour {
 		GUI.Box(new Rect(0,0,Screen.width,20),"");
 
 		if (GUI.Button(new Rect(0,0,100,20),"Apps")) appsWindowEnabled = !appsWindowEnabled;
-
 		if (GUI.Button(new Rect(100,0,100,20),"Achievements")) achievementsWindowEnabled = !achievementsWindowEnabled;
-
 		if (GUI.Button(new Rect(200,0,100,20),"Statistics")) statisticsWindowEnabled = !statisticsWindowEnabled;
-
 		if (GUI.Button(new Rect(300,0,100,20),"Leaderboards")) leaderboardsWindowEnabled = !leaderboardsWindowEnabled;
-
 		if (GUI.Button(new Rect(400,0,100,20),"User status")) userStatusWindowEnabled = !userStatusWindowEnabled;
-		
 		if (GUI.Button(new Rect(500,0,100,20),"Storage")) storageWindowEnabled = !storageWindowEnabled;
-
 		if (GUI.Button(new Rect(600,0,100,20),"Game")) gameWindowEnabled = !gameWindowEnabled;
-
-		if (GUI.Button(new Rect(700,0,100,20),"Console")) debugConsoleWindowEnabled = !debugConsoleWindowEnabled;
-
+		if (GUI.Button(new Rect(700,0,100,20),"Arguments")) argumentsWindowEnabled = !argumentsWindowEnabled;
+		if (GUI.Button(new Rect(800,0,100,20),"Console")) debugConsoleWindowEnabled = !debugConsoleWindowEnabled;
 		if (GUI.Button(new Rect(Screen.width-20,0,20,20),"X")) topBarEnabled = false;
 
 		GUI.EndGroup();
@@ -98,7 +93,7 @@ public class DebugController : MonoBehaviour {
 	*	APPS	*
 	************/
 	bool appsWindowEnabled = false;
-	Rect appsWindowRect = new Rect(0,20,335,70);
+	Rect appsWindowRect = new Rect(0,20,335,120);
 	string appsDlcProductID = "productID";
 
 	private void AppsWindow (int windowID) 
@@ -110,6 +105,10 @@ public class DebugController : MonoBehaviour {
 		if (GUI.Button(new Rect(5,45,160,20),"IsDlcInstalled")) GalaxyManager.Instance.IsDlcInstalled(ulong.Parse(appsDlcProductID));
 		appsDlcProductID = GUI.TextField(new Rect(170,45,135,20),appsDlcProductID);
 		if (GUI.Button(new Rect(310,45,20,20),"?")) productIDWindowEnabled = !productIDWindowEnabled;
+
+		if (GUI.Button(new Rect(5,70,325,20),"SignedIn")) GalaxyManager.Instance.IsSignedIn();
+
+		if (GUI.Button(new Rect(5,95,325,20),"IsLoggedOn")) GalaxyManager.Instance.IsLoggedOn();
 
 		GUI.DragWindow();
 	}
@@ -416,7 +415,6 @@ public class DebugController : MonoBehaviour {
 			Debug.Log("What is the path on macOS??");
 #endif
 		}
-
 		GUI.DragWindow();
 	}
 
@@ -488,6 +486,34 @@ public class DebugController : MonoBehaviour {
 			if (GameObject.Find(name)) GameObject.Find(name).SetActive(false);
 			else Debug.Log("Could not find object " + name);
 		}
+	}
+
+	/****************
+	*	Arguments	*
+	****************/
+
+	bool argumentsWindowEnabled = false;
+	Rect argumentsWindowRect = new Rect(700, 20, 335, 225);
+	
+
+	private string printCommandLineArguments() {
+		string argList = null;
+		string[] args = Environment.GetCommandLineArgs();
+
+        foreach (string arg in args) {
+            argList += arg + "\n";
+        }
+
+		return argList;
+	}
+
+	private void ArgumentsWindow(int windowID) 
+	{
+		if (GUI.Button (new Rect(318,2,15,15),"X")) argumentsWindowEnabled = false;
+
+		GUI.Label(new Rect(5, 20, 325, 200), printCommandLineArguments());
+		
+		GUI.DragWindow();
 	}
 
 	/************
