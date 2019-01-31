@@ -68,7 +68,7 @@ public class LeaderboardsController : MonoBehaviour
         foreach (object[] entry in GalaxyManager.Instance.Leaderboards.LeaderboardEntries)
         {
             currentObject = Instantiate(entryPrefab, entriesContainer.transform);
-            currentObject.transform.GetChild(0).GetComponent<Text>().text = GalaxyManager.Instance.Friends.GetFriendPersonaName((Galaxy.Api.GalaxyID)entry[2]);
+            currentObject.transform.GetChild(0).GetComponent<Text>().text = entry[2].ToString();
             currentObject.transform.GetChild(1).GetComponent<Text>().text = entry[1].ToString();
             entriesList.Add(currentObject);
         }

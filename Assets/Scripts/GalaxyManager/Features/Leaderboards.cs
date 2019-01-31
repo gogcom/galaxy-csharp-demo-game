@@ -148,17 +148,24 @@ public class Leaderboards : MonoBehaviour
         public override void OnLeaderboardEntriesRetrieveSuccess(string leaderboardName, uint entryCount)
         {
             Debug.Log("Leaderboard \"" + leaderboardName + "\" entries retrieved\nEntry count: " + entryCount);
-            uint rank = 0;
-            int score = 0;
+
             leaderboardEntries.Clear();
             leaderboardEntries.TrimExcess();
 
             for (uint i = 0; i < entryCount; i++)
             {
                 GalaxyID userID = new GalaxyID();
+                uint rank = 0;
+                int score = 0;
+                string username = null;
+                object[] entryDetails = new object[] { rank, score, username };
+                
                 GalaxyInstance.Stats().GetRequestedLeaderboardEntry(i, ref rank, ref score, ref userID);
-                object[] entryDetails = new object[] { rank, score, userID };
-                Debug.Log("Created object #" + i + " | " + rank + " | " + score + " | " + userID);
+                username = GalaxyManager.Instance.Friends.GetFriendPersonaName(userID);
+                entryDetails[0] = rank;
+                entryDetails[1] = score; 
+                entryDetails[2] = username;
+                Debug.Log("Created object #" + i + " | " + rank + " | " + score + " | " + username);
                 leaderboardEntries.Add(entryDetails);
             }
 

@@ -68,6 +68,7 @@ public class GalaxyManager : MonoBehaviour
 
     //  Authentication listener
     public AuthenticationListener authListener;
+    public GogServicesConnectionStateListener gogServicesConnectionStateListener;
 
     #endregion
 
@@ -123,11 +124,13 @@ public class GalaxyManager : MonoBehaviour
     private void ListenersInit()
     {
         if (authListener == null) authListener = new AuthenticationListener();
+        if (gogServicesConnectionStateListener == null) gogServicesConnectionStateListener = new GogServicesConnectionStateListener();
     }
 
     void ListenersDispose()
     {
         if (authListener != null) authListener.Dispose();
+        if (gogServicesConnectionStateListener != null) gogServicesConnectionStateListener.Dispose();
     }
 
     #endregion
@@ -329,6 +332,20 @@ public class GalaxyManager : MonoBehaviour
         return gameLanguage;
     }
 
+    public void ShowOverlayWithWebPage (string url)
+    {
+        Debug.Log("Opening overlay with web page " + url);
+        try
+        {
+            GalaxyInstance.Utils().ShowOverlayWithWebPage(url);
+            Debug.Log("Opened overlay with web page " + url);
+        }
+        catch (GalaxyInstance.Error e)
+        {
+            Debug.Log("Could not open overlay with web page " + url + " for reason " + e);
+        }
+    }
+
     #endregion
 
     #region Listeners
@@ -368,6 +385,14 @@ public class GalaxyManager : MonoBehaviour
             if (GameObject.Find("MainMenu") != null) GameObject.Find("MainMenu").GetComponent<MainMenuController>().GalaxyCheck();
         }
 
+    }
+
+    public class GogServicesConnectionStateListener : GlobalGogServicesConnectionStateListener
+    {
+        public override void OnConnectionStateChange(GogServicesConnectionState connected)
+        {
+            Debug.Log("Connection state to GOG services changed to " + connected);
+        }
     }
 
     #endregion
