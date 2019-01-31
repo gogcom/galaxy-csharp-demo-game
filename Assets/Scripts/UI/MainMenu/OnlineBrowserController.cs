@@ -12,11 +12,15 @@ public class OnlineBrowserController : MonoBehaviour
 
     void OnEnable()
     {
+        // Initialize the required listeners
+        GalaxyManager.Instance.Matchmaking.LobbyBrowsingListenersInit();
         RequestLobbyList(false);
     }
 
     void OnDisable()
     {
+        // We don't want to dispose the listeners here because we need them when joining the game,
+        // and that happens after this menu is closed.
         DisposeLobbiesList();
     }
 
@@ -41,7 +45,8 @@ public class OnlineBrowserController : MonoBehaviour
             Debug.Log("Current lobby ID " + lobbyID);
             currentEntry = Instantiate(entryPrefab, entriesContainer.transform);
             currentEntry.transform.GetChild(0).GetComponent<Text>().text = GalaxyManager.Instance.Matchmaking.GetLobbyData(lobbyID, "name");
-            currentEntry.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
+            currentEntry.transform.GetChild(1).GetComponent<Text>().text = GalaxyManager.Instance.Matchmaking.GetPingWith(lobbyID).ToString();
+            currentEntry.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
             {
                 JoinLobby(lobbyID);
             });

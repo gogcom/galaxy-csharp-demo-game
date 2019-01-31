@@ -28,18 +28,19 @@ public class DebugController : MonoBehaviour {
 		if (MouseController.Overriden) GUI.Label(new Rect(Screen.width/2-80,Screen.height/2-10,160,20), "MOUSE OVERRIDE ON",overrideText);
 		if (appsWindowEnabled) appsWindowRect = GUI.Window(0,appsWindowRect,AppsWindow,"Apps");
 		if (appsWindowEnabled && productIDWindowEnabled) ProductIDWindow();
-		if (achievementsWindowEnabled) achievementsWindowRect = GUI.Window(1,achievementsWindowRect,AchievementsWindow,"Achievements");
+		if (utilsWindowEnabled) utilsWindowRect = GUI.Window(1,utilsWindowRect,UtilsWindow,"Utils");
+		if (achievementsWindowEnabled) achievementsWindowRect = GUI.Window(2,achievementsWindowRect,AchievementsWindow,"Achievements");
 		if (achievementsWindowEnabled && achievementsApiKeyWindowEnabled) AchievemntsApiKeysWindow();
-		if (statisticsWindowEnabled) statisticsWindowRect = GUI.Window(2,statisticsWindowRect,StatisticsWindow,"Statistics");
+		if (statisticsWindowEnabled) statisticsWindowRect = GUI.Window(3,statisticsWindowRect,StatisticsWindow,"Statistics");
 		if (statisticsWindowEnabled && statisticsFloatApiKeyWindowEnabled) StatisticsFloatApiKeysWindow();
 		if (statisticsWindowEnabled && statisticsIntApiKeyWindowEnabled) StatisticsIntApiKeysWindow();
-		if (leaderboardsWindowEnabled) leaderboardsWindowRect = GUI.Window(3,leaderboardsWindowRect,LeaderboardsWindow,"Leaderboards");
+		if (leaderboardsWindowEnabled) leaderboardsWindowRect = GUI.Window(4,leaderboardsWindowRect,LeaderboardsWindow,"Leaderboards");
 		if (leaderboardsWindowEnabled && leaderboardsApiKeyWindowEnabled) LeaderboardsApiKeysWindow();
-		if (userStatusWindowEnabled) userStatusWindowRect = GUI.Window(4,userStatusWindowRect,UserStatusWindow,"User status");
-		if (storageWindowEnabled) storageWindowRect = GUI.Window(5,storageWindowRect,StorageWindow,"Storage");
-		if (gameWindowEnabled) gameWindowRect = GUI.Window(6,gameWindowRect,GameWindow,"Game");
-		if (argumentsWindowEnabled) argumentsWindowRect = GUI.Window(7,argumentsWindowRect,ArgumentsWindow,"Arguments");
-		if (debugConsoleWindowEnabled) debugConsoleWindowRect = GUI.Window(8,debugConsoleWindowRect,DebugConsole,"Console");
+		if (userStatusWindowEnabled) userStatusWindowRect = GUI.Window(5,userStatusWindowRect,UserStatusWindow,"User status");
+		if (storageWindowEnabled) storageWindowRect = GUI.Window(6,storageWindowRect,StorageWindow,"Storage");
+		if (gameWindowEnabled) gameWindowRect = GUI.Window(7,gameWindowRect,GameWindow,"Game");
+		if (argumentsWindowEnabled) argumentsWindowRect = GUI.Window(8,argumentsWindowRect,ArgumentsWindow,"Arguments");
+		if (debugConsoleWindowEnabled) debugConsoleWindowRect = GUI.Window(9,debugConsoleWindowRect,DebugConsole,"Console");
 	}
 
 	void OnDestroy()
@@ -76,14 +77,15 @@ public class DebugController : MonoBehaviour {
 		GUI.Box(new Rect(0,0,Screen.width,20),"");
 
 		if (GUI.Button(new Rect(0,0,100,20),"Apps")) appsWindowEnabled = !appsWindowEnabled;
-		if (GUI.Button(new Rect(100,0,100,20),"Achievements")) achievementsWindowEnabled = !achievementsWindowEnabled;
-		if (GUI.Button(new Rect(200,0,100,20),"Statistics")) statisticsWindowEnabled = !statisticsWindowEnabled;
-		if (GUI.Button(new Rect(300,0,100,20),"Leaderboards")) leaderboardsWindowEnabled = !leaderboardsWindowEnabled;
-		if (GUI.Button(new Rect(400,0,100,20),"User status")) userStatusWindowEnabled = !userStatusWindowEnabled;
-		if (GUI.Button(new Rect(500,0,100,20),"Storage")) storageWindowEnabled = !storageWindowEnabled;
-		if (GUI.Button(new Rect(600,0,100,20),"Game")) gameWindowEnabled = !gameWindowEnabled;
-		if (GUI.Button(new Rect(700,0,100,20),"Arguments")) argumentsWindowEnabled = !argumentsWindowEnabled;
-		if (GUI.Button(new Rect(800,0,100,20),"Console")) debugConsoleWindowEnabled = !debugConsoleWindowEnabled;
+		if (GUI.Button(new Rect(100,0,100,20),"Utils")) utilsWindowEnabled = !utilsWindowEnabled;
+		if (GUI.Button(new Rect(200,0,100,20),"Achievements")) achievementsWindowEnabled = !achievementsWindowEnabled;
+		if (GUI.Button(new Rect(300,0,100,20),"Statistics")) statisticsWindowEnabled = !statisticsWindowEnabled;
+		if (GUI.Button(new Rect(400,0,100,20),"Leaderboards")) leaderboardsWindowEnabled = !leaderboardsWindowEnabled;
+		if (GUI.Button(new Rect(500,0,100,20),"User status")) userStatusWindowEnabled = !userStatusWindowEnabled;
+		if (GUI.Button(new Rect(600,0,100,20),"Storage")) storageWindowEnabled = !storageWindowEnabled;
+		if (GUI.Button(new Rect(700,0,100,20),"Game")) gameWindowEnabled = !gameWindowEnabled;
+		if (GUI.Button(new Rect(800,0,100,20),"Arguments")) argumentsWindowEnabled = !argumentsWindowEnabled;
+		if (GUI.Button(new Rect(900,0,100,20),"Console")) debugConsoleWindowEnabled = !debugConsoleWindowEnabled;
 		if (GUI.Button(new Rect(Screen.width-20,0,20,20),"X")) topBarEnabled = false;
 
 		GUI.EndGroup();
@@ -143,11 +145,28 @@ public class DebugController : MonoBehaviour {
 
 	}
 
+	/************
+	*	UTILS	*
+	************/
+	bool utilsWindowEnabled = false;
+	Rect utilsWindowRect = new Rect(100,20,170,70);
+	string url = null;
+
+	private void UtilsWindow (int windowID) 
+	{
+		if (GUI.Button (new Rect(153,2,15,15),"X")) utilsWindowEnabled = false;
+
+		if (GUI.Button(new Rect(5,20,160,20),"ShowOverlayWithWebPage")) GalaxyManager.Instance.ShowOverlayWithWebPage(url);
+		url = GUI.TextField(new Rect(5,45,160,20),url);
+
+		GUI.DragWindow();
+	}
+
 	/********************
 	*	ACHIEVEMENTS	*
 	********************/
 	bool achievementsWindowEnabled = false;
-	Rect achievementsWindowRect = new Rect(100,20,170,120);
+	Rect achievementsWindowRect = new Rect(200,20,170,120);
 	string achievementApiKey = "apiKey";
 
 	private void AchievementsWindow (int windowID) 
@@ -196,7 +215,7 @@ public class DebugController : MonoBehaviour {
 	*	STATISTICS	*
 	****************/
 	bool statisticsWindowEnabled = false;
-	Rect statisticsWindowRect = new Rect(200,20,335,195);
+	Rect statisticsWindowRect = new Rect(300,20,335,195);
 	string statisticFloatApiKey = "floatApiKey";
 	string statisticIntApiKey = "intApiKey";
 	string statisticFloatValue = "floatValue";
@@ -281,7 +300,7 @@ public class DebugController : MonoBehaviour {
 	*	LEADERBOARDS	*
 	********************/
 	bool leaderboardsWindowEnabled = false;
-	Rect leaderboardsWindowRect = new Rect(300,20,335,120);
+	Rect leaderboardsWindowRect = new Rect(400,20,335,120);
 	string leaderboardApiKey = "apiKey";
 	string leaderboardFrom = "From";
 	string leaderboardTo = "To";
@@ -339,7 +358,7 @@ public class DebugController : MonoBehaviour {
 	*	USER STATUS		*
 	********************/
 	bool userStatusWindowEnabled = false;
-	Rect userStatusWindowRect = new Rect(400,20,170,105);
+	Rect userStatusWindowRect = new Rect(500,20,170,105);
 	private void UserStatusWindow (int windowID) 
 	{
 		if (GUI.Button (new Rect(153,2,15,15),"X")) userStatusWindowEnabled = false;
@@ -356,7 +375,7 @@ public class DebugController : MonoBehaviour {
 	*	STORAGE		*
 	****************/
 	bool storageWindowEnabled = false;
-	Rect storageWindowRect = new Rect(500,20,335,195);
+	Rect storageWindowRect = new Rect(600,20,335,195);
 	string inputFileWriteTarget = "absolutInputPath";
 	string fileRemoveTarget = "localStorageRelativePath";
 	string fileNameShare = "localStorageRelativePath";
@@ -436,7 +455,7 @@ public class DebugController : MonoBehaviour {
 	*	GAME	*
 	*************/
 	bool gameWindowEnabled = false;
-	Rect gameWindowRect = new Rect(600,20,170,225);
+	Rect gameWindowRect = new Rect(700,20,170,225);
 
 	private void GameWindow (int windowID) 
 	{
@@ -493,7 +512,7 @@ public class DebugController : MonoBehaviour {
 	****************/
 
 	bool argumentsWindowEnabled = false;
-	Rect argumentsWindowRect = new Rect(700, 20, 335, 225);
+	Rect argumentsWindowRect = new Rect(800, 20, 335, 225);
 	
 
 	private string printCommandLineArguments() {

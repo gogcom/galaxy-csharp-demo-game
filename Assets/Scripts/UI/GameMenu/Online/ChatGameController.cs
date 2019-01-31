@@ -15,7 +15,7 @@ public class ChatGameController : MonoBehaviour {
 
     void OnEnable()
     {
-        GalaxyManager.Instance.Matchmaking.StartLobbyChat();
+        GalaxyManager.Instance.Matchmaking.LobbyChatListenersInit();
         lobbyID = GalaxyManager.Instance.Matchmaking.CurrentLobbyID;
     }
 
@@ -32,7 +32,7 @@ public class ChatGameController : MonoBehaviour {
     void OnDisable()
     {
         DisposeEntries();
-        GalaxyManager.Instance.Matchmaking.ShutdownLobbyChat();
+        GalaxyManager.Instance.Matchmaking.LobbyChatListenersDispose();
     }
 
     public void DisplayChatMessages()

@@ -16,14 +16,13 @@ public class ChatMenuController : MonoBehaviour
 
     void OnEnable()
     {
-        GalaxyManager.Instance.Matchmaking.StartLobbyChat();
+        GalaxyManager.Instance.Matchmaking.LobbyChatListenersInit();
         lobbyID = GalaxyManager.Instance.Matchmaking.CurrentLobbyID;
     }
 
     void Update()
     {
-        lobbyMessageHistory = GalaxyManager.Instance.Matchmaking.chatLobbyMessageListener.chatLobbyMessageHistory;
-        if (lobbyMessageHistory.Count > messagesEntriesList.Count)
+        if (CheckForNewChatMessages())
         {
             DisplayChatMessages();
         }
@@ -34,7 +33,14 @@ public class ChatMenuController : MonoBehaviour
     void OnDisable()
     {
         DisposeEntries();
-        GalaxyManager.Instance.Matchmaking.ShutdownLobbyChat();
+        GalaxyManager.Instance.Matchmaking.LobbyChatListenersDispose();
+    }
+
+    public bool CheckForNewChatMessages()
+    {
+        lobbyMessageHistory = GalaxyManager.Instance.Matchmaking.chatLobbyMessageListener.chatLobbyMessageHistory;
+        if (lobbyMessageHistory.Count > messagesEntriesList.Count) return true;
+        else return false;
     }
 
     public void DisplayChatMessages()

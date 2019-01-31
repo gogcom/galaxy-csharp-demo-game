@@ -82,17 +82,20 @@ public class Networking : MonoBehaviour
     // Prepares a byte array with information on players shot and sends it using SendP2PPacket method
     public void SendPacketWithPlayerShot(GameManager.FoulEnum foul, GameManager.BallColorEnum ballOn, int shotScore)
     {
+        Debug.Log("Packet position sent");
+        
         SendPacketWithBallPositions();
         GetBytesFromInt((int)foul, 0, ref switchPacketBuffer);
         GetBytesFromInt((int)ballOn, 4, ref switchPacketBuffer);
         GetBytesFromInt(shotScore, 8, ref switchPacketBuffer);
         SendP2PPacket(receiverID, switchPacketBuffer, P2PSendType.P2P_SEND_RELIABLE, (byte)1);
-        Debug.Log("Networking switch packet sent");
     }
 
     // Prepares a byte array with information on balls positions and status and sends it using SendP2PPacket method
     void SendPacketWithBallPositions()
     {
+        Debug.Log("Packet position sent");
+
         int startIndex = 0;
         for (int i = 0; i < balls.Length; i++)
         {
@@ -107,11 +110,11 @@ public class Networking : MonoBehaviour
     // Reads a received packet with information on players shot
     void ReadPacketWithPlayerShot(byte[] switchPacketReceived)
     {
+        Debug.Log("Packet switch received");
+
         GameManager.FoulEnum foul;
         GameManager.BallColorEnum ballOn;
         int shotScore;
-
-        Debug.Log("Packet switch received");
 
         if (switchPacketReceived != null)
         {
@@ -130,6 +133,8 @@ public class Networking : MonoBehaviour
     // Reads a received packet with information balls positions
     void ReadPacketWithBallPositions(byte[] positionPacketReceived)
     {
+        Debug.Log("Packet position received");
+
         int startIndex = 0;
         float x;
         float z;

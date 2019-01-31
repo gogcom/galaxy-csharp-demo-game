@@ -135,7 +135,8 @@ public class Online2PlayerGameManager : GameManager
     {
         ResetBalls();
         CreatePlayers();
-        GalaxyManager.Instance.Matchmaking.StartLobbyManagmentInGame();
+        GalaxyManager.Instance.Matchmaking.LobbyManagmentMainMenuListenersDispose();
+        GalaxyManager.Instance.Matchmaking.LobbyManagmentInGameListenersInit();
         GalaxyManager.Instance.Matchmaking.SetLobbyMemberData("state", "go");
         GalaxyManager.Instance.StartNetworking();
     }
