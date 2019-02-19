@@ -9,7 +9,6 @@ public class PopUps : MonoBehaviour {
 	public GameObject popUpWithButton;
 	private Text popUpWithButtonText;
 	private Button popUpWithButtonButton;
-	public GameObject popUpWaitingWithButton;
 	CursorLockMode lastState = CursorLockMode.None;
 
 	void Awake()
@@ -56,12 +55,11 @@ public class PopUps : MonoBehaviour {
 
 	public void GameWaitingForOtherPlayer () 
 	{
-		popUpWaitingWithButton.SetActive(true);
+		popUpWithButton.SetActive(true);
 		lastState = Cursor.lockState;
 		MouseController.ChangeMouseLockMode(CursorLockMode.None);
 
-		popUpWaitingWithButton.transform.Find("Button").GetComponent<Button>().onClick.AddListener ( () => {
-			GalaxyManager.Instance.ShutdownNetworking();
+		popUpWithButtonButton.onClick.AddListener ( () => {
 			GalaxyManager.Instance.Matchmaking.LeaveLobby();
 			SceneController.Instance.LoadScene(SceneController.SceneName.MainMenu, true);
 		});
@@ -75,8 +73,19 @@ public class PopUps : MonoBehaviour {
 
 		popUpWithButtonText.text = "Other player left the lobby";
 		popUpWithButtonButton.onClick.AddListener (() => {
-			GalaxyManager.Instance.ShutdownNetworking();
 			GalaxyManager.Instance.Matchmaking.LeaveLobby();
+			SceneController.Instance.LoadScene(SceneController.SceneName.MainMenu, true);
+		});
+	}
+
+	public void ConnectionToLobbyLost () 
+	{
+		popUpWithButton.SetActive(true);
+		lastState = Cursor.lockState;
+		MouseController.ChangeMouseLockMode(CursorLockMode.None);
+
+		popUpWithButtonText.text = "Connection to lobby lost lobby";
+		popUpWithButtonButton.onClick.AddListener (() => {
 			SceneController.Instance.LoadScene(SceneController.SceneName.MainMenu, true);
 		});
 	}
@@ -89,7 +98,6 @@ public class PopUps : MonoBehaviour {
 
 		popUpWithButtonText.text = "Host left the lobby";
 		popUpWithButtonButton.onClick.AddListener (() => {
-			GalaxyManager.Instance.ShutdownNetworking();
 			SceneController.Instance.LoadScene(SceneController.SceneName.MainMenu, true);
 		});
 	}
@@ -97,7 +105,6 @@ public class PopUps : MonoBehaviour {
 	public void ClosePopUps () 
 	{
 		if (popUpWithButton.activeInHierarchy) popUpWithButton.SetActive(false);
-		if (popUpWaitingWithButton.activeInHierarchy) popUpWaitingWithButton.SetActive(false);
 		MouseController.ChangeMouseLockMode(lastState);
 	}
 	

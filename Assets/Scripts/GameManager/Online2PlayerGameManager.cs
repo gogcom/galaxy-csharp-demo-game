@@ -112,7 +112,7 @@ public class Online2PlayerGameManager : GameManager
 		inMenu = false;
 		CurrentCameraPositionType = GameCameraController.CameraPositionType.Top;
         GameFinished = false;
-
+        // Setting GameManager instance to this
         if (Instance == null) Instance = this;
         else Destroy(this);
 
@@ -122,12 +122,17 @@ public class Online2PlayerGameManager : GameManager
         escMenu.SetActive(false);
         message.SetActive(false);
 
-        if (GameObject.Find("GalaxyManager") && GalaxyManager.Instance.GalaxyFullyInitialized && GalaxyManager.Instance.IsSignedIn())
-        {
-            galaxyManagerActive = true;
-            fouls = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("fouls");
-            shotsTaken = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("shotsTaken");
-        }
+        Debug.Assert(GameObject.Find("GalaxyManager") && GalaxyManager.Instance.GalaxyFullyInitialized && GalaxyManager.Instance.IsSignedIn());
+
+        galaxyManagerActive = true;
+        fouls = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("fouls");
+        shotsTaken = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("shotsTaken");
+        
+        GalaxyManager.Instance.Matchmaking.LobbyManagmentInGameListenersInit();
+        GalaxyManager.Instance.Matchmaking.SetLobbyMemberData("state", "go");
+
+        GameObject.Find("PopUps").GetComponent<PopUps>().ClosePopUps();
+        GameObject.Find("PopUps").GetComponent<PopUps>().GameWaitingForOtherPlayer();
 
     }
 
@@ -135,9 +140,6 @@ public class Online2PlayerGameManager : GameManager
     {
         ResetBalls();
         CreatePlayers();
-        GalaxyManager.Instance.Matchmaking.LobbyManagmentMainMenuListenersDispose();
-        GalaxyManager.Instance.Matchmaking.LobbyManagmentInGameListenersInit();
-        GalaxyManager.Instance.Matchmaking.SetLobbyMemberData("state", "go");
         GalaxyManager.Instance.StartNetworking();
     }
 

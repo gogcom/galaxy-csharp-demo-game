@@ -26,18 +26,19 @@ public class DebugController : MonoBehaviour {
 		Disclaimer();
 		if (topBarEnabled) TopBar();
 		if (MouseController.Overriden) GUI.Label(new Rect(Screen.width/2-80,Screen.height/2-10,160,20), "MOUSE OVERRIDE ON",overrideText);
-		if (appsWindowEnabled) appsWindowRect = GUI.Window(0,appsWindowRect,AppsWindow,"Apps");
+		if (userStatusWindowEnabled) userStatusWindowRect = GUI.Window(0,userStatusWindowRect,UserStatusWindow,"User");
+		if (appsWindowEnabled) appsWindowRect = GUI.Window(1,appsWindowRect,AppsWindow,"Apps");
 		if (appsWindowEnabled && productIDWindowEnabled) ProductIDWindow();
-		if (utilsWindowEnabled) utilsWindowRect = GUI.Window(1,utilsWindowRect,UtilsWindow,"Utils");
-		if (achievementsWindowEnabled) achievementsWindowRect = GUI.Window(2,achievementsWindowRect,AchievementsWindow,"Achievements");
+		if (utilsWindowEnabled) utilsWindowRect = GUI.Window(2,utilsWindowRect,UtilsWindow,"Utils");
+		if (achievementsWindowEnabled) achievementsWindowRect = GUI.Window(3,achievementsWindowRect,AchievementsWindow,"Achievements");
 		if (achievementsWindowEnabled && achievementsApiKeyWindowEnabled) AchievemntsApiKeysWindow();
-		if (statisticsWindowEnabled) statisticsWindowRect = GUI.Window(3,statisticsWindowRect,StatisticsWindow,"Statistics");
+		if (statisticsWindowEnabled) statisticsWindowRect = GUI.Window(4,statisticsWindowRect,StatisticsWindow,"Statistics");
 		if (statisticsWindowEnabled && statisticsFloatApiKeyWindowEnabled) StatisticsFloatApiKeysWindow();
 		if (statisticsWindowEnabled && statisticsIntApiKeyWindowEnabled) StatisticsIntApiKeysWindow();
-		if (leaderboardsWindowEnabled) leaderboardsWindowRect = GUI.Window(4,leaderboardsWindowRect,LeaderboardsWindow,"Leaderboards");
+		if (leaderboardsWindowEnabled) leaderboardsWindowRect = GUI.Window(5,leaderboardsWindowRect,LeaderboardsWindow,"Leaderboards");
 		if (leaderboardsWindowEnabled && leaderboardsApiKeyWindowEnabled) LeaderboardsApiKeysWindow();
-		if (userStatusWindowEnabled) userStatusWindowRect = GUI.Window(5,userStatusWindowRect,UserStatusWindow,"User status");
 		if (storageWindowEnabled) storageWindowRect = GUI.Window(6,storageWindowRect,StorageWindow,"Storage");
+		// if (matchmakingWindowEnabled) matchmakingWindowRect = GUI.Window(7,matchmakingWindowRect,MatchmakingWindow,"Matchmaking");
 		if (gameWindowEnabled) gameWindowRect = GUI.Window(7,gameWindowRect,GameWindow,"Game");
 		if (argumentsWindowEnabled) argumentsWindowRect = GUI.Window(8,argumentsWindowRect,ArgumentsWindow,"Arguments");
 		if (debugConsoleWindowEnabled) debugConsoleWindowRect = GUI.Window(9,debugConsoleWindowRect,DebugConsole,"Console");
@@ -76,13 +77,14 @@ public class DebugController : MonoBehaviour {
 		
 		GUI.Box(new Rect(0,0,Screen.width,20),"");
 
-		if (GUI.Button(new Rect(0,0,100,20),"Apps")) appsWindowEnabled = !appsWindowEnabled;
-		if (GUI.Button(new Rect(100,0,100,20),"Utils")) utilsWindowEnabled = !utilsWindowEnabled;
-		if (GUI.Button(new Rect(200,0,100,20),"Achievements")) achievementsWindowEnabled = !achievementsWindowEnabled;
-		if (GUI.Button(new Rect(300,0,100,20),"Statistics")) statisticsWindowEnabled = !statisticsWindowEnabled;
-		if (GUI.Button(new Rect(400,0,100,20),"Leaderboards")) leaderboardsWindowEnabled = !leaderboardsWindowEnabled;
-		if (GUI.Button(new Rect(500,0,100,20),"User status")) userStatusWindowEnabled = !userStatusWindowEnabled;
+		if (GUI.Button(new Rect(0,0,100,20),"User")) userStatusWindowEnabled = !userStatusWindowEnabled;
+		if (GUI.Button(new Rect(100,0,100,20),"Apps")) appsWindowEnabled = !appsWindowEnabled;
+		if (GUI.Button(new Rect(200,0,100,20),"Utils")) utilsWindowEnabled = !utilsWindowEnabled;
+		if (GUI.Button(new Rect(300,0,100,20),"Achievements")) achievementsWindowEnabled = !achievementsWindowEnabled;
+		if (GUI.Button(new Rect(400,0,100,20),"Statistics")) statisticsWindowEnabled = !statisticsWindowEnabled;
+		if (GUI.Button(new Rect(500,0,100,20),"Leaderboards")) leaderboardsWindowEnabled = !leaderboardsWindowEnabled;
 		if (GUI.Button(new Rect(600,0,100,20),"Storage")) storageWindowEnabled = !storageWindowEnabled;
+		// if (GUI.Button(new Rect(700,0,100,20),"Matchmaking")) matchmakingWindowEnabled = !matchmakingWindowEnabled;
 		if (GUI.Button(new Rect(700,0,100,20),"Game")) gameWindowEnabled = !gameWindowEnabled;
 		if (GUI.Button(new Rect(800,0,100,20),"Arguments")) argumentsWindowEnabled = !argumentsWindowEnabled;
 		if (GUI.Button(new Rect(900,0,100,20),"Console")) debugConsoleWindowEnabled = !debugConsoleWindowEnabled;
@@ -92,10 +94,38 @@ public class DebugController : MonoBehaviour {
 	}
 
 	/************
+	*	USER	*
+	************/
+	bool userStatusWindowEnabled = false;
+	Rect userStatusWindowRect = new Rect(0,20,170,205);
+	string galaxyID = "GalaxyID";
+	private void UserStatusWindow (int windowID) 
+	{
+		if (GUI.Button (new Rect(153,2,15,15),"X")) userStatusWindowEnabled = false;
+
+		GUI.Label(new Rect(5,20,160,20),"Init: " + GalaxyManager.Instance.GalaxyFullyInitialized.ToString());
+
+		GUI.Label(new Rect(5,40,160,20),"SignedIn: " + GalaxyManager.Instance.IsSignedIn(true).ToString());
+		GUI.Label(new Rect(5,60,160,20),"LoggedOn: " + GalaxyManager.Instance.IsLoggedOn(true).ToString());
+
+		if (GalaxyManager.Instance.Friends) GUI.Label(new Rect(5,80,160,20),"Username: " + GalaxyManager.Instance.Friends.GetMyUsername(true).ToString());
+
+		if (GUI.Button(new Rect(5,105,160,20),"SignIn")) GalaxyManager.Instance.SignIn();
+
+		if (GUI.Button(new Rect(5,130,160,20),"SignOut")) GalaxyManager.Instance.SignOut();
+
+		if (GUI.Button(new Rect(5,155,160,20),"SignedIn")) GalaxyManager.Instance.IsSignedIn();
+
+		if (GUI.Button(new Rect(5,180,160,20),"IsLoggedOn")) GalaxyManager.Instance.IsLoggedOn();
+
+		GUI.DragWindow();
+	}
+
+	/************
 	*	APPS	*
 	************/
 	bool appsWindowEnabled = false;
-	Rect appsWindowRect = new Rect(0,20,335,120);
+	Rect appsWindowRect = new Rect(100,20,335,70);
 	string appsDlcProductID = "productID";
 
 	private void AppsWindow (int windowID) 
@@ -107,10 +137,6 @@ public class DebugController : MonoBehaviour {
 		if (GUI.Button(new Rect(5,45,160,20),"IsDlcInstalled")) GalaxyManager.Instance.IsDlcInstalled(ulong.Parse(appsDlcProductID));
 		appsDlcProductID = GUI.TextField(new Rect(170,45,135,20),appsDlcProductID);
 		if (GUI.Button(new Rect(310,45,20,20),"?")) productIDWindowEnabled = !productIDWindowEnabled;
-
-		if (GUI.Button(new Rect(5,70,325,20),"SignedIn")) GalaxyManager.Instance.IsSignedIn();
-
-		if (GUI.Button(new Rect(5,95,325,20),"IsLoggedOn")) GalaxyManager.Instance.IsLoggedOn();
 
 		GUI.DragWindow();
 	}
@@ -149,7 +175,7 @@ public class DebugController : MonoBehaviour {
 	*	UTILS	*
 	************/
 	bool utilsWindowEnabled = false;
-	Rect utilsWindowRect = new Rect(100,20,170,70);
+	Rect utilsWindowRect = new Rect(200,20,170,70);
 	string url = null;
 
 	private void UtilsWindow (int windowID) 
@@ -166,7 +192,7 @@ public class DebugController : MonoBehaviour {
 	*	ACHIEVEMENTS	*
 	********************/
 	bool achievementsWindowEnabled = false;
-	Rect achievementsWindowRect = new Rect(200,20,170,120);
+	Rect achievementsWindowRect = new Rect(300,20,170,120);
 	string achievementApiKey = "apiKey";
 
 	private void AchievementsWindow (int windowID) 
@@ -215,7 +241,7 @@ public class DebugController : MonoBehaviour {
 	*	STATISTICS	*
 	****************/
 	bool statisticsWindowEnabled = false;
-	Rect statisticsWindowRect = new Rect(300,20,335,195);
+	Rect statisticsWindowRect = new Rect(400,20,335,195);
 	string statisticFloatApiKey = "floatApiKey";
 	string statisticIntApiKey = "intApiKey";
 	string statisticFloatValue = "floatValue";
@@ -300,7 +326,7 @@ public class DebugController : MonoBehaviour {
 	*	LEADERBOARDS	*
 	********************/
 	bool leaderboardsWindowEnabled = false;
-	Rect leaderboardsWindowRect = new Rect(400,20,335,120);
+	Rect leaderboardsWindowRect = new Rect(500,20,335,120);
 	string leaderboardApiKey = "apiKey";
 	string leaderboardFrom = "From";
 	string leaderboardTo = "To";
@@ -352,23 +378,6 @@ public class DebugController : MonoBehaviour {
 			horizontalPosition += 20;
 		}
 		GUI.EndScrollView();
-	}
-
-	/********************
-	*	USER STATUS		*
-	********************/
-	bool userStatusWindowEnabled = false;
-	Rect userStatusWindowRect = new Rect(500,20,170,105);
-	private void UserStatusWindow (int windowID) 
-	{
-		if (GUI.Button (new Rect(153,2,15,15),"X")) userStatusWindowEnabled = false;
-
-		GUI.Label(new Rect(5,20,160,20),"Init: " + GalaxyManager.Instance.GalaxyFullyInitialized.ToString());
-		GUI.Label(new Rect(5,40,160,20),"SignedIn: " + GalaxyManager.Instance.IsSignedIn(true).ToString());
-		GUI.Label(new Rect(5,60,160,20),"LoggedOn: " + GalaxyManager.Instance.IsLoggedOn(true).ToString());
-		if (GalaxyManager.Instance.Friends) GUI.Label(new Rect(5,80,160,20),"Username: " + GalaxyManager.Instance.Friends.GetMyUsername(true).ToString());
-
-		GUI.DragWindow();
 	}
 
 	/****************
@@ -451,9 +460,35 @@ public class DebugController : MonoBehaviour {
 		GalaxyManager.Instance.Storage.DownloadSharedFileFromUser(realGalaxyID,fileName);
 	}
 
+	/****************
+	*	MATCHMAKING	*
+	****************/
+
+/* 	bool matchmakingWindowEnabled = false;
+	Rect matchmakingWindowRect = new Rect(700,20,170,170);
+	string lobbyIDString = null;
+
+	private void MatchmakingWindow (int windowdID)
+	{
+		if (GUI.Button (new Rect(153,2,15,15),"X")) matchmakingWindowEnabled = false;
+
+		GUI.Label(new Rect(5,20,160,20), "Only in lobby browser ");
+
+		if (GUI.Button (new Rect(5,45,160,20), "RequestLobbyList")) GalaxyManager.Instance.Matchmaking.RequestLobbyList(false);
+		if (GUI.Button (new Rect(5,70,160,20), "JoinLobby")) GalaxyManager.Instance.Matchmaking.JoinLobby(StringToGalaxyID(lobbyIDString));
+
+		GUI.Label(new Rect(5,95,160,20), "Only when hosting a lobby");
+
+		if (GUI.Button (new Rect(5,120,160,20), "ToggleLobbyJoinable")) Galaxy.Api.GalaxyInstance.Matchmaking().SetLobbyJoinable(StringToGalaxyID(lobbyIDString), !Galaxy.Api.GalaxyInstance.Matchmaking().IsLobbyJoinable(StringToGalaxyID(lobbyIDString)));
+
+		lobbyIDString = GUI.TextField(new Rect(5,145,160,20), lobbyIDString);
+
+		GUI.DragWindow();
+	} */
+
 	/************
 	*	GAME	*
-	*************/
+	************/
 	bool gameWindowEnabled = false;
 	Rect gameWindowRect = new Rect(700,20,170,225);
 
@@ -508,7 +543,7 @@ public class DebugController : MonoBehaviour {
 	}
 
 	/****************
-	*	Arguments	*
+	*	ARGUMENTS	*
 	****************/
 
 	bool argumentsWindowEnabled = false;
@@ -583,6 +618,13 @@ public class DebugController : MonoBehaviour {
 			horizontalPosition += 20;
 		}
 		GUI.EndScrollView();
+	}
+
+	private Galaxy.Api.GalaxyID StringToGalaxyID(string stringID) 
+	{
+		ulong ulongID = ulong.Parse(stringID);
+		Galaxy.Api.GalaxyID galaxyID = new Galaxy.Api.GalaxyID(ulongID);
+		return galaxyID;
 	}
 
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Galaxy.Api;
@@ -11,6 +12,7 @@ public class OnlineWaitController : MonoBehaviour
     public GameObject startGameButton;
     private List<GameObject> entriesList = new List<GameObject>();
     private GalaxyID lobbyID;
+    private IEnumerator displayPlayerListCoroutine;
 
     void OnEnable()
     {
@@ -24,37 +26,41 @@ public class OnlineWaitController : MonoBehaviour
         
         GalaxyManager.Instance.Friends.SetRichPresence("status", "In online lobby");
         GalaxyManager.Instance.Friends.SetRichPresence("connect", "--JoinLobby=" + lobbyID);
-    }
 
-    void Update()
-    {
-        DisplayPlayerList();
+        displayPlayerListCoroutine = DisplayPlayerListCoroutine();
+        StartCoroutine(displayPlayerListCoroutine);
     }
 
     void OnDisable()
     {
         GalaxyManager.Instance.Friends.SetRichPresence("connect", null);
         startGameButton.GetComponent<Button>().interactable = false;
+        GalaxyManager.Instance.Matchmaking.LobbyManagmentMainMenuListenersDispose();
+        StopCoroutine(displayPlayerListCoroutine);
         DisposeEntries();
     }
 
-    void DisplayPlayerList()
+    IEnumerator DisplayPlayerListCoroutine()
     {
-        uint lobbyMembersCount = GalaxyManager.Instance.Matchmaking.GetNumLobbyMembers(lobbyID);
+        uint lobbyMembersCount;
         GameObject currentEntry;
         GalaxyID currentMember;
 
-        DisposeEntries();
-
-        for (uint i = 0; i < lobbyMembersCount; i++)
+        for(;;)
         {
-            currentMember = GalaxyManager.Instance.Matchmaking.GetLobbyMemberByIndex(lobbyID, i);
-            currentEntry = Instantiate(entryPrefab, entriesContainer.transform);
-            currentEntry.name = currentMember.ToString();
-            currentEntry.transform.GetChild(0).GetComponent<Text>().text = GalaxyManager.Instance.Friends.GetFriendPersonaName(currentMember);
-            currentEntry.transform.GetChild(1).GetComponent<Text>().text = GalaxyManager.Instance.Matchmaking.GetPingWith(currentMember).ToString();
-            currentEntry.transform.GetChild(2).GetComponent<Text>().text = GalaxyManager.Instance.Matchmaking.GetLobbyMemberData(currentMember, "state");
-            entriesList.Add(currentEntry);
+            lobbyMembersCount = GalaxyManager.Instance.Matchmaking.GetNumLobbyMembers(lobbyID);
+            DisposeEntries();
+            for (uint i = 0; i < lobbyMembersCount; i++)
+            {
+                currentMember = GalaxyManager.Instance.Matchmaking.GetLobbyMemberByIndex(lobbyID, i);
+                currentEntry = Instantiate(entryPrefab, entriesContainer.transform);
+                currentEntry.name = currentMember.ToString();
+                currentEntry.transform.GetChild(0).GetComponent<Text>().text = GalaxyManager.Instance.Friends.GetFriendPersonaName(currentMember);
+                currentEntry.transform.GetChild(1).GetComponent<Text>().text = GalaxyManager.Instance.Matchmaking.GetPingWith(currentMember).ToString();
+                currentEntry.transform.GetChild(2).GetComponent<Text>().text = GalaxyManager.Instance.Matchmaking.GetLobbyMemberData(currentMember, "state");
+                entriesList.Add(currentEntry);
+            }
+            yield return new WaitForSecondsRealtime(0.5f);
         }
 
     }
@@ -67,7 +73,6 @@ public class OnlineWaitController : MonoBehaviour
         }
         entriesList.Clear();
         entriesList.TrimExcess();
-
     }
 
     public void Ready()

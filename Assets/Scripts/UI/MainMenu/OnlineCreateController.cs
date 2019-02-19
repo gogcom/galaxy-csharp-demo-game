@@ -17,7 +17,7 @@ public class OnlineCreateController : MonoBehaviour
     // Creates lobby
     public void CreateLobby()
     {
-        LobbyTopologyType lobbyTopologyTypeFCM = Galaxy.Api.LobbyTopologyType.LOBBY_TOPOLOGY_TYPE_FCM;
+        LobbyTopologyType lobbyTopologyTypeFCM = Galaxy.Api.LobbyTopologyType.LOBBY_TOPOLOGY_TYPE_STAR;
         uint maxMembers = 2;
         LobbyType lobbyPrivacy;
         if (gameName.text == "")
