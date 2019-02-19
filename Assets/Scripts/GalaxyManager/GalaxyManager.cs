@@ -241,7 +241,7 @@ public class GalaxyManager : MonoBehaviour
 
     /* Signs the current user in to Galaxy services
     NOTE: This call is asynchronus. Sign in result is received by AuthListener. */
-    private void SignIn()
+    public void SignIn()
     {
         Debug.Log("Signing user in...");
         try
@@ -251,6 +251,20 @@ public class GalaxyManager : MonoBehaviour
         catch (GalaxyInstance.Error e)
         {
             Debug.LogWarning("SignIn failed for reason " + e);
+        }
+    }
+
+    /* Signs the current user out from Galaxy services */
+    public void SignOut()
+    {
+        Debug.Log("Singing user out...");
+        try
+        {
+            GalaxyInstance.User().SignOut();
+        }
+        catch (GalaxyInstance.Error e)
+        {
+            Debug.LogWarning("SignOut failed for reason " + e);
         }
     }
 
