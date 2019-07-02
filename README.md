@@ -9,7 +9,7 @@ Follow these instructions to get our demo up and running on your machine in no t
 ### Prerequisites
 
 * Unity Editor (2017.3.1f1 or newer) can be downloaded from [Unity](https://unity3d.com/) website.
-* GOG Galaxy(R) SDK Unity Package can be downloaded from [GOG Developer Portal](https://devportal.gog.com/panel/components/sdk). Please note that you need to have access to GOG Developer Portal to download GOG Galaxy(R) SDK.
+* GOG Galaxy(R) SDK Unity Package can be downloaded from [GOG Developer Portal](https://devportal.gog.com/galaxy/components/sdk). Please note that you need to have access to GOG Developer Portal to download GOG Galaxy(R) SDK.
 
 ### Installing
 
@@ -18,7 +18,7 @@ Follow these instructions to get our demo up and running on your machine in no t
 ```
 git clone https://github.com/gogcom/galaxy-csharp-demo-game
 ```
-3. Download GOG Galaxy(R) SDK Unity Package from [GOG Developer Portal](https://devportal.gog.com/panel/components/sdk).
+3. Download GOG Galaxy(R) SDK Unity Package from [GOG Developer Portal](https://devportal.gog.com/galaxy/components/sdk).
 4. Open our Unity Project with Unity Editor.
 5. Import GOG Galaxy(R) SDK Unity Package via the Unity Editor. 
 ```
@@ -30,7 +30,7 @@ Assets -> Import Package -> Custom Package
 ## Built with
 
 * [Unity3D](https://unity3d.com/)
-* [GOG Galaxy(R) SDK](https://devportal.gog.com/panel/components/sdk)
+* [GOG Galaxy(R) SDK](https://devportal.gog.com/galaxy/components/sdk)
 
 ## Authors
 
