@@ -243,7 +243,7 @@ public class GalaxyManager : MonoBehaviour
         Debug.Log("Signing user in...");
         try
         {
-            GalaxyInstance.User().SignIn();
+            GalaxyInstance.User().SignInGalaxy();
         }
         catch (GalaxyInstance.Error e)
         {
