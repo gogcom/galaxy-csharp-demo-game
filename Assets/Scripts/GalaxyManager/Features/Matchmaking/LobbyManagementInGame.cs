@@ -97,9 +97,9 @@ public class LobbyManagementInGame : MonoBehaviour
     private class LobbyLeftListener : GlobalLobbyLeftListener
     {
         Matchmaking matchmaking = GalaxyManager.Instance.Matchmaking;
-        public override void OnLobbyLeft(GalaxyID lobbyID, bool ioFailure)
+        public override void OnLobbyLeft(GalaxyID lobbyID, LobbyLeaveReason leaveReason)
         {
-            if (!ioFailure)
+            if (leaveReason != LobbyLeaveReason.LOBBY_LEAVE_REASON_CONNECTION_LOST)
             {
                 if (!matchmaking.leftOnMyOwn)
                 {
@@ -109,7 +109,7 @@ public class LobbyManagementInGame : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("OnLobbyLeft failure " + ioFailure);
+                Debug.LogWarning("OnLobbyLeft failure " + leaveReason);
             }
         }
 
