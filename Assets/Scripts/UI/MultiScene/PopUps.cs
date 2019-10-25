@@ -17,8 +17,9 @@ public class PopUps : MonoBehaviour {
 		popUpWithButtonButton = popUpWithButton.transform.Find("Button").GetComponent<Button>();
 	}
 
-	public void MenuHostLeftLobby () 
+	public void MenuHostLeftLobby() 
 	{
+		ClosePopUps();
 		popUpWithButton.SetActive(true);
 		lastState = Cursor.lockState;
 		MouseController.ChangeMouseLockMode(CursorLockMode.None);
@@ -29,8 +30,9 @@ public class PopUps : MonoBehaviour {
 		});
 	}
 
-	public void MenuCouldNotCreate () 
+	public void MenuCouldNotCreate() 
 	{
+		ClosePopUps();
 		popUpWithButton.SetActive(true);
 		lastState = Cursor.lockState;
 		MouseController.ChangeMouseLockMode(CursorLockMode.None);
@@ -41,8 +43,9 @@ public class PopUps : MonoBehaviour {
 		});
 	}
 
-	public void MenuCouldNotJoin (string reason)
+	public void MenuCouldNotJoin(string reason)
 	{
+		ClosePopUps();
 		popUpWithButton.SetActive(true);
 		lastState = Cursor.lockState;
 		MouseController.ChangeMouseLockMode(CursorLockMode.None);
@@ -53,8 +56,9 @@ public class PopUps : MonoBehaviour {
 		});
 	}
 
-	public void GameWaitingForOtherPlayer () 
+	public void GameWaitingForOtherPlayer() 
 	{
+		ClosePopUps();
 		popUpWithButton.SetActive(true);
 		lastState = Cursor.lockState;
 		MouseController.ChangeMouseLockMode(CursorLockMode.None);
@@ -65,8 +69,9 @@ public class PopUps : MonoBehaviour {
 		});
 	}
 
-	public void GameClientLeftLobby () 
+	public void GameClientLeftLobby() 
 	{
+		ClosePopUps();
 		popUpWithButton.SetActive(true);
 		lastState = Cursor.lockState;
 		MouseController.ChangeMouseLockMode(CursorLockMode.None);
@@ -78,8 +83,9 @@ public class PopUps : MonoBehaviour {
 		});
 	}
 
-	public void ConnectionToLobbyLost () 
+	public void ConnectionToLobbyLost() 
 	{
+		ClosePopUps();
 		popUpWithButton.SetActive(true);
 		lastState = Cursor.lockState;
 		MouseController.ChangeMouseLockMode(CursorLockMode.None);
@@ -90,8 +96,9 @@ public class PopUps : MonoBehaviour {
 		});
 	}
 
-	public void GameHostLeftLobby () 
+	public void GameHostLeftLobby() 
 	{
+		ClosePopUps();
 		popUpWithButton.SetActive(true);
 		lastState = Cursor.lockState;
 		MouseController.ChangeMouseLockMode(CursorLockMode.None);
@@ -102,7 +109,7 @@ public class PopUps : MonoBehaviour {
 		});
 	}
 
-	public void ClosePopUps () 
+	public void ClosePopUps()
 	{
 		if (popUpWithButton.activeInHierarchy) popUpWithButton.SetActive(false);
 		MouseController.ChangeMouseLockMode(lastState);

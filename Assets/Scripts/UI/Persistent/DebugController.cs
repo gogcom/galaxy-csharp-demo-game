@@ -97,8 +97,9 @@ public class DebugController : MonoBehaviour {
 	*	USER	*
 	************/
 	bool userStatusWindowEnabled = false;
-	Rect userStatusWindowRect = new Rect(0,20,170,205);
-	string galaxyID = "GalaxyID";
+	Rect userStatusWindowRect = new Rect(0,20,170,255);
+	string username = "Username";
+	string password = "Password";
 	private void UserStatusWindow (int windowID) 
 	{
 		if (GUI.Button (new Rect(153,2,15,15),"X")) userStatusWindowEnabled = false;
@@ -110,13 +111,19 @@ public class DebugController : MonoBehaviour {
 
 		if (GalaxyManager.Instance.Friends) GUI.Label(new Rect(5,80,160,20),"Username: " + GalaxyManager.Instance.Friends.GetMyUsername(true).ToString());
 
-		if (GUI.Button(new Rect(5,105,160,20),"SignIn")) GalaxyManager.Instance.SignIn();
+		if (GUI.Button(new Rect(5,105,160,20),"SignInGalaxy")) GalaxyManager.Instance.SignInGalaxy();
 
-		if (GUI.Button(new Rect(5,130,160,20),"SignOut")) GalaxyManager.Instance.SignOut();
+		username = GUI.TextField(new Rect(5,130,75,20),username);
 
-		if (GUI.Button(new Rect(5,155,160,20),"SignedIn")) GalaxyManager.Instance.IsSignedIn();
+		password = GUI.TextField(new Rect(90,130,75,20),password);
 
-		if (GUI.Button(new Rect(5,180,160,20),"IsLoggedOn")) GalaxyManager.Instance.IsLoggedOn();
+		if (GUI.Button(new Rect(5,155,160,20),"SignInCredentials")) GalaxyManager.Instance.SignInCredentials(username, password);
+
+		if (GUI.Button(new Rect(5,180,160,20),"SignOut")) GalaxyManager.Instance.SignOut();
+
+		if (GUI.Button(new Rect(5,205,160,20),"SignedIn")) GalaxyManager.Instance.IsSignedIn();
+
+		if (GUI.Button(new Rect(5,230,160,20),"IsLoggedOn")) GalaxyManager.Instance.IsLoggedOn();
 
 		GUI.DragWindow();
 	}
@@ -175,8 +182,9 @@ public class DebugController : MonoBehaviour {
 	*	UTILS	*
 	************/
 	bool utilsWindowEnabled = false;
-	Rect utilsWindowRect = new Rect(200,20,170,70);
-	string url = null;
+	Rect utilsWindowRect = new Rect(200,20,170,120);
+	string url = "url";
+	string richPresence = "RichPresenceStatus";
 
 	private void UtilsWindow (int windowID) 
 	{
@@ -184,6 +192,9 @@ public class DebugController : MonoBehaviour {
 
 		if (GUI.Button(new Rect(5,20,160,20),"ShowOverlayWithWebPage")) GalaxyManager.Instance.ShowOverlayWithWebPage(url);
 		url = GUI.TextField(new Rect(5,45,160,20),url);
+
+		if (GUI.Button(new Rect(5,70,160,20),"SetRichPresence")) GalaxyManager.Instance.Friends.SetRichPresence("status", richPresence);
+		richPresence = GUI.TextField(new Rect(5,95,160,20),richPresence);
 
 		GUI.DragWindow();
 	}

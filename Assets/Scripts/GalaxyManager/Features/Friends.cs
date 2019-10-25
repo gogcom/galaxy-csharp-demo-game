@@ -41,8 +41,8 @@ public class Friends : MonoBehaviour
 
     private void ListenersInit()
     {
-        if (friendListListener == null) friendListListener = new FriendListListener();
-        if (richPresenceChangeListener == null) richPresenceChangeListener = new RichPresenceChangeListener();
+        friendListListener = new FriendListListener();
+        richPresenceChangeListener = new RichPresenceChangeListener();
     }
 
     private void ListenersDispose()

@@ -37,9 +37,9 @@ public class Leaderboards : MonoBehaviour
     // Instantiates listeners 
     private void ListenersInit()
     {
-        if (leadRetrieveListener == null) leadRetrieveListener = new LeaderboardsRetrieveListener();
-        if (leadEntriesRetrieveListener == null) leadEntriesRetrieveListener = new LeaderboardEntriesRetrieveListener();
-        if (leadScoreUpdateListener == null) leadScoreUpdateListener = new LeaderboardScoreUpdateListener();
+        leadRetrieveListener = new LeaderboardsRetrieveListener();
+        leadEntriesRetrieveListener = new LeaderboardEntriesRetrieveListener();
+        leadScoreUpdateListener = new LeaderboardScoreUpdateListener();
     }
 
     // Disposes listeners

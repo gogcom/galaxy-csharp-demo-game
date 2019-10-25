@@ -32,9 +32,9 @@ public class StatsAndAchievements : MonoBehaviour
 
     private void ListenersInit()
     {
-        if (achievementRetrieveListener == null) achievementRetrieveListener = new UserStatsAndAchievementsRetrieveListener();
-        if (achievementChangeListener == null) achievementChangeListener = new AchievementChangeListener();
-        if (achievementStoreListener == null) achievementStoreListener = new StatsAndAchievementsStoreListener();
+        achievementRetrieveListener = new UserStatsAndAchievementsRetrieveListener();
+        achievementChangeListener = new AchievementChangeListener();
+        achievementStoreListener = new StatsAndAchievementsStoreListener();
     }
 
     private void ListenersDispose()

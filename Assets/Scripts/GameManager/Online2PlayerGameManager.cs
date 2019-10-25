@@ -127,8 +127,7 @@ public class Online2PlayerGameManager : GameManager
         galaxyManagerActive = true;
         fouls = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("fouls");
         shotsTaken = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("shotsTaken");
-        
-        GalaxyManager.Instance.Matchmaking.LobbyManagmentInGameListenersInit();
+
         GalaxyManager.Instance.Matchmaking.SetLobbyMemberData("state", "go");
 
         GameObject.Find("PopUps").GetComponent<PopUps>().ClosePopUps();
@@ -152,6 +151,7 @@ public class Online2PlayerGameManager : GameManager
     {
         Time.timeScale = 1.0f;
         RemovePlayers();
+        GalaxyManager.Instance.ShutdownNetworking();
         Destroy(GameManager.Instance);
     }
 
