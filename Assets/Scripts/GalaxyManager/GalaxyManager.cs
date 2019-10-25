@@ -92,7 +92,7 @@ public class GalaxyManager : MonoBehaviour
     {
         Init();
         ListenersInit();
-        SignIn();
+        SignInGalaxy();
     }
 
     void Update()
@@ -108,7 +108,7 @@ public class GalaxyManager : MonoBehaviour
         ListenersDispose();
     }
 
-    void OnDestroy()
+    void OnApplicationQuit()
     {
         /* Shuts down the working instance of GalaxyPeer. 
         NOTE: Shutdown should be the last method called, and all listeners should be closed before that. */
@@ -123,8 +123,8 @@ public class GalaxyManager : MonoBehaviour
 
     private void ListenersInit()
     {
-        if (authListener == null) authListener = new AuthenticationListener();
-        if (gogServicesConnectionStateListener == null) gogServicesConnectionStateListener = new GogServicesConnectionStateListener();
+        authListener = new AuthenticationListener();
+        gogServicesConnectionStateListener = new GogServicesConnectionStateListener();
     }
 
     void ListenersDispose()
@@ -241,16 +241,29 @@ public class GalaxyManager : MonoBehaviour
 
     /* Signs the current user in to Galaxy services
     NOTE: This call is asynchronus. Sign in result is received by AuthListener. */
-    public void SignIn()
+    public void SignInGalaxy()
     {
-        Debug.Log("Signing user in...");
+        Debug.Log("Signing user in using Galaxy client...");
         try
         {
             GalaxyInstance.User().SignInGalaxy();
         }
         catch (GalaxyInstance.Error e)
         {
-            Debug.LogWarning("SignIn failed for reason " + e);
+            Debug.LogWarning("SignInGalaxy failed for reason " + e);
+        }
+    }
+
+    public void SignInCredentials(string username, string password)
+    {
+        Debug.Log("Signing user in using credentials...");
+        try
+        {
+            GalaxyInstance.User().SignInCredentials(username, password);
+        }
+        catch (GalaxyInstance.Error e)
+        {
+            Debug.LogWarning("SignInCredentials failed for reason " + e);
         }
     }
 
@@ -366,7 +379,7 @@ public class GalaxyManager : MonoBehaviour
 
     /* Informs about the event of authenticating user
     Callback for method:
-    SignIn() */
+    SignInGalaxy() */
     public class AuthenticationListener : GlobalAuthListener
     {
         public override void OnAuthSuccess()

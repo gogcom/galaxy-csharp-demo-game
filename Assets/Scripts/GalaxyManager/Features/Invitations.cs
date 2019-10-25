@@ -34,8 +34,8 @@ public class Invitations : MonoBehaviour
 
     private void ListenersInit()
     {
-        if (inviteReceivedListener == null) inviteReceivedListener = new GameInvitationReceivedListener();
-        if (joinRequestedListener == null) joinRequestedListener = new GameJoinRequestedListener();
+        inviteReceivedListener = new GameInvitationReceivedListener();
+        joinRequestedListener = new GameJoinRequestedListener();
     }
 
     private void ListenersDispose()

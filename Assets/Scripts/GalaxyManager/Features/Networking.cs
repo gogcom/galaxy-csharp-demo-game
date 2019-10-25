@@ -51,7 +51,7 @@ public class Networking : MonoBehaviour
     // Istantiantes listeners
     private void ListenersInit()
     {
-        if (networkListener == null) networkListener = new NetworkingListener();
+        networkListener = new NetworkingListener();
     }
 
     // Disposes listeners

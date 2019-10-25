@@ -25,9 +25,9 @@ public class Storage : MonoBehaviour {
 	#region Listener methods
 	private void ListenersInit ()
 	{
-		if (fileShareListener == null) fileShareListener = new FileShareListener();
-		if (sharedFileDownloadListener == null) sharedFileDownloadListener = new SharedFileDownloadListener();
-		if (specificUserDataListener == null) specificUserDataListener = new SpecificUserDataListener();
+		fileShareListener = new FileShareListener();
+		sharedFileDownloadListener = new SharedFileDownloadListener();
+		specificUserDataListener = new SpecificUserDataListener();
 	}
 
 	private void ListenersDispose ()
@@ -41,8 +41,8 @@ public class Storage : MonoBehaviour {
 	#region Methods
 
 	/* This method reads a specified file from your hard-drive and copies it to local storage.
-	This is an example, as in normal scenarios you can use Galaxy SDK FileWrite method to write
-	bytes from memory to a file in local storage, ie. create new files not copy existing ones. */
+	Please note that you can use Galaxy SDK FileWrite method to write bytes from memory to a 
+	file in local storage i.e. create new file instead of copying an existing one. */
 	public void CopyFileToLocalStorage (string absoluteInputPath)
 	{
 		string fileName = null;
