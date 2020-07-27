@@ -12,12 +12,15 @@ public class OnlineBrowserController : MonoBehaviour
 
     void OnEnable()
     {
-        GalaxyManager.Instance.Matchmaking.StartLobbyBrowsing();
+        // Initialize the required listeners
+        GalaxyManager.Instance.Matchmaking.LobbyBrowsingListenersInit();
         RequestLobbyList(false);
     }
 
     void OnDisable()
     {
+        // We don't want to dispose the listeners here because we need them when joining the game,
+        // and that happens after this menu is closed.
         DisposeLobbiesList();
     }
 
@@ -32,19 +35,23 @@ public class OnlineBrowserController : MonoBehaviour
     }
 
     // This is called in OnLobbyDataUpdated listener
-    public void DisplayLobbyList(List<GalaxyID> lobbyList)
+    public void DisplayLobbyList(List<object[]> lobbyList)
     {
         Debug.Log("Displaying lobby list");
         waitingCircularArrow.SetActive(false);
         GameObject currentEntry;
-        foreach (GalaxyID lobbyID in lobbyList)
+
+        if (lobbyList == null) return;
+
+        foreach (object[] lobby in lobbyList)
         {
-            Debug.Log("Current lobby ID " + lobbyID);
+            Debug.Log("Current lobby ID " + lobby[2].ToString());
             currentEntry = Instantiate(entryPrefab, entriesContainer.transform);
-            currentEntry.transform.GetChild(0).GetComponent<Text>().text = GalaxyManager.Instance.Matchmaking.GetLobbyData(lobbyID, "name");
-            currentEntry.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
+            currentEntry.transform.GetChild(0).GetComponent<Text>().text = lobby[0].ToString();
+            currentEntry.transform.GetChild(1).GetComponent<Text>().text = lobby[1].ToString();
+            currentEntry.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
             {
-                JoinLobby(lobbyID);
+                JoinLobby((GalaxyID)lobby[2]);
             });
             entriesList.Add(currentEntry);
         }

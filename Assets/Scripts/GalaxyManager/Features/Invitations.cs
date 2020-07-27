@@ -2,6 +2,7 @@
 using System;
 using Galaxy.Api;
 using UnityEngine.SceneManagement;
+using Helpers;
 
 public class Invitations : MonoBehaviour
 {
@@ -34,14 +35,14 @@ public class Invitations : MonoBehaviour
 
     private void ListenersInit()
     {
-        if (inviteReceivedListener == null) inviteReceivedListener = new GameInvitationReceivedListener();
-        if (joinRequestedListener == null) joinRequestedListener = new GameJoinRequestedListener();
+        Listener.Create(ref inviteReceivedListener);
+        Listener.Create(ref joinRequestedListener);
     }
 
     private void ListenersDispose()
     {
-        if (inviteReceivedListener != null) inviteReceivedListener.Dispose();
-        if (joinRequestedListener != null) joinRequestedListener.Dispose();
+        Listener.Dispose(ref inviteReceivedListener);
+        Listener.Dispose(ref joinRequestedListener);
     }
 
     #endregion
@@ -99,7 +100,7 @@ public class Invitations : MonoBehaviour
             else
             {
                 Debug.Log("Main menu scene not loaded, subscribing to SceneManager.sceneLoaded event");
-                SceneManager.sceneLoaded += OnSceneLoaded;
+                SceneManager.sceneLoaded += JoinLobbyOnceMainMenuIsLoaded;
             }
         }
     }
@@ -119,7 +120,7 @@ public class Invitations : MonoBehaviour
             else
             {
                 Debug.Log("Main menu scene not loaded, subscribing to SceneManager.sceneLoaded event and loading MainMenu scene");
-                SceneManager.sceneLoaded += OnSceneLoaded;
+                SceneManager.sceneLoaded += JoinLobbyOnceMainMenuIsLoaded;
                 SceneController.Instance.LoadScene(SceneController.SceneName.MainMenu, true);
             }
         }
@@ -127,12 +128,12 @@ public class Invitations : MonoBehaviour
 
     /* If invite was accepted when scene other than main menu was active, this listener is attached to sceneLoaded event
     Note: we unsubscribe from sceneLoaded event in the listener as we only want this to happen once */
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    void JoinLobbyOnceMainMenuIsLoaded(Scene scene, LoadSceneMode mode)
     {
         if (scene.name == "MainMenu")
         {
             JoinLobby();
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            SceneManager.sceneLoaded -= JoinLobbyOnceMainMenuIsLoaded;
         }
     }
 
@@ -141,7 +142,7 @@ public class Invitations : MonoBehaviour
     {
         Debug.Log("Joining LobbyID " + pendingLobbyID);
         GalaxyManager.Instance.StartMatchmaking();
-        GalaxyManager.Instance.Matchmaking.StartLobbyBrowsing();
+        GalaxyManager.Instance.Matchmaking.LobbyBrowsingListenersInit();
         GalaxyManager.Instance.Matchmaking.JoinLobby(pendingLobbyID);
         GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.OnlineJoining);
         pendingLobbyID = null;

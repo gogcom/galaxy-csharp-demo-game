@@ -1,8 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerOnlineController : PlayerController {
+
+    private Online2PlayerGameManager onlineGameManager;
+    private PlayerOnline playerOnline;
 
     void Awake ()
     {
@@ -11,15 +12,18 @@ public class PlayerOnlineController : PlayerController {
         thrust = 1f;
         rotationSpeed = 100f;
         offset = GameManager.Instance.offset;
+        playerOnline = (PlayerOnline)player;
+        onlineGameManager = (Online2PlayerGameManager)GameManager.Instance;
     }
 
-    // On every frame
     void Update()
     {
         if (GameManager.Instance.GameFinished) return;
         GuiControls();
         FollowTarget();
-        if (GameManager.Instance.InMenu || MouseController.Overriden) return;
+        if (GameManager.Instance.InMenu ||
+            MouseController.Overriden || 
+            onlineGameManager.ChatOpen) return;
         switch (player.PlayerState)
         {
             case GameManager.PlayerState.ActiveWIH:
@@ -31,7 +35,7 @@ public class PlayerOnlineController : PlayerController {
                 RotatePlayerAroundTarget();
                 break;
             case GameManager.PlayerState.Passive:
-                if (((PlayerOnline)player).Active) Skip();
+                if (playerOnline.Active) Skip();
                 RotatePlayerAroundTarget();
                 break;
         }
@@ -39,19 +43,20 @@ public class PlayerOnlineController : PlayerController {
     }
 
     protected override void GuiControls()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape)) 
-        {
-            if (((Online2PlayerGameManager)GameManager.Instance).ChatOpen) ((Online2PlayerGameManager)GameManager.Instance).ChatOpen = false;
-            else GameManager.Instance.InMenu = !GameManager.Instance.InMenu;
+    {        
+        if (Input.GetKeyDown(KeyCode.F1) && !GameManager.Instance.InMenu) onlineGameManager.help.SetActive(!onlineGameManager.help.activeInHierarchy);
+        if (Input.GetKeyDown(KeyCode.F2) && !GameManager.Instance.InMenu) onlineGameManager.hint.SetActive(!onlineGameManager.hint.activeInHierarchy);
+        if (Input.GetKeyDown(KeyCode.T) && !GameManager.Instance.InMenu && !onlineGameManager.ChatOpen) {
+            onlineGameManager.ChatOpen = true;
+            onlineGameManager.chatController.messagePrompt.ActivateInputField();
         }
-        if (Input.GetKeyDown(KeyCode.F1) && !GameManager.Instance.InMenu) GameManager.Instance.help.SetActive(!GameManager.Instance.help.activeInHierarchy);
-        if (Input.GetKeyDown(KeyCode.F2) && !GameManager.Instance.InMenu) GameManager.Instance.hint.SetActive(!GameManager.Instance.hint.activeInHierarchy);
-        if (Input.GetKeyDown(KeyCode.T) && !GameManager.Instance.InMenu && !((Online2PlayerGameManager)GameManager.Instance).ChatOpen) ((Online2PlayerGameManager)GameManager.Instance).ChatOpen = true;
-        if (Input.GetKeyDown(KeyCode.Return) && ((Online2PlayerGameManager)GameManager.Instance).ChatOpen)
-        {
-            ((Online2PlayerGameManager)GameManager.Instance).chatWindow.GetComponent<ChatGameController>().SendLobbyMessage();
-            ((Online2PlayerGameManager)GameManager.Instance).ChatOpen = false;
+        if (Input.GetKeyDown(KeyCode.Return) && onlineGameManager.ChatOpen) {
+            onlineGameManager.chatController.SendLobbyMessage();
+            onlineGameManager.ChatOpen = false;
+        }
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (onlineGameManager.ChatOpen) onlineGameManager.ChatOpen = false;
+            else GameManager.Instance.InMenu = !GameManager.Instance.InMenu;
         }
     }
 	

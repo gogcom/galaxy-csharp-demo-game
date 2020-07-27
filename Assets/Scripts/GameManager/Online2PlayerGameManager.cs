@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
 public class Online2PlayerGameManager : GameManager
 {
@@ -27,8 +26,9 @@ public class Online2PlayerGameManager : GameManager
             inMenu = value;
         }
     }
+    public ChatController chatController;
     public GameObject chatWindow;
-    public bool chatOpen;
+    private bool chatOpen;
     public bool ChatOpen 
     {
         get
@@ -112,7 +112,7 @@ public class Online2PlayerGameManager : GameManager
 		inMenu = false;
 		CurrentCameraPositionType = GameCameraController.CameraPositionType.Top;
         GameFinished = false;
-
+        // Setting GameManager instance to this
         if (Instance == null) Instance = this;
         else Destroy(this);
 
@@ -122,12 +122,16 @@ public class Online2PlayerGameManager : GameManager
         escMenu.SetActive(false);
         message.SetActive(false);
 
-        if (GameObject.Find("GalaxyManager") && GalaxyManager.Instance.GalaxyFullyInitialized && GalaxyManager.Instance.IsSignedIn())
-        {
-            galaxyManagerActive = true;
-            fouls = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("fouls");
-            shotsTaken = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("shotsTaken");
-        }
+        Debug.Assert(GameObject.Find("GalaxyManager") && GalaxyManager.Instance.GalaxyFullyInitialized && GalaxyManager.Instance.IsSignedIn());
+
+        galaxyManagerActive = true;
+        fouls = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("fouls");
+        shotsTaken = GalaxyManager.Instance.StatsAndAchievements.GetStatInt("shotsTaken");
+
+        GalaxyManager.Instance.Matchmaking.SetLobbyMemberData("state", "go");
+
+        GameObject.Find("PopUps").GetComponent<PopUps>().ClosePopUps();
+        GameObject.Find("PopUps").GetComponent<PopUps>().PopUpWithLeaveLobbyButton("Waiting for other players", "back");
 
     }
 
@@ -135,8 +139,6 @@ public class Online2PlayerGameManager : GameManager
     {
         ResetBalls();
         CreatePlayers();
-        GalaxyManager.Instance.Matchmaking.StartLobbyManagementInGame();
-        GalaxyManager.Instance.Matchmaking.SetLobbyMemberData("state", "go");
         GalaxyManager.Instance.StartNetworking();
     }
 
@@ -149,6 +151,7 @@ public class Online2PlayerGameManager : GameManager
     {
         Time.timeScale = 1.0f;
         RemovePlayers();
+        GalaxyManager.Instance.ShutdownNetworking();
         Destroy(GameManager.Instance);
     }
 
@@ -316,13 +319,13 @@ public class Online2PlayerGameManager : GameManager
     public void PopChatPrompt ()
     {
         chatWindow.SetActive(true);
-        StartCoroutine(CloseChatPrompt());
+        StartCoroutine(CloseChatPromptAfterSeconds());
     }
 
-    private IEnumerator CloseChatPrompt (float secondsToClose = 2.5f)
+    private IEnumerator CloseChatPromptAfterSeconds (float secondsToClose = 2.5f)
     {
         yield return new WaitForSeconds (secondsToClose);
-        if (!ChatOpen) chatWindow.SetActive(false);
+        if (!chatOpen) chatWindow.SetActive(false);
     }
 
     #endregion

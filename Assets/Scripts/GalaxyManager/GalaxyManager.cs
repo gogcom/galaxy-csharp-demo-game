@@ -1,6 +1,7 @@
 using UnityEngine;
 using Galaxy.Api;
 using System.Collections.Generic;
+using Helpers;
 
 public class GalaxyManager : MonoBehaviour
 {
@@ -68,6 +69,7 @@ public class GalaxyManager : MonoBehaviour
 
     //  Authentication listener
     public AuthenticationListener authListener;
+    public GogServicesConnectionStateListener gogServicesConnectionStateListener;
 
     #endregion
 
@@ -83,7 +85,6 @@ public class GalaxyManager : MonoBehaviour
         else 
         {
             Destroy(this);
-            return;
         }
     }
 
@@ -91,7 +92,7 @@ public class GalaxyManager : MonoBehaviour
     {
         Init();
         ListenersInit();
-        SignIn();
+        SignInGalaxy();
     }
 
     void Update()
@@ -107,7 +108,7 @@ public class GalaxyManager : MonoBehaviour
         ListenersDispose();
     }
 
-    void OnDestroy()
+    void OnApplicationQuit()
     {
         /* Shuts down the working instance of GalaxyPeer. 
         NOTE: Shutdown should be the last method called, and all listeners should be closed before that. */
@@ -122,12 +123,14 @@ public class GalaxyManager : MonoBehaviour
 
     private void ListenersInit()
     {
-        if (authListener == null) authListener = new AuthenticationListener();
+        Listener.Create(ref authListener);
+        Listener.Create(ref gogServicesConnectionStateListener);
     }
 
-    void ListenersDispose()
+    private void ListenersDispose()
     {
-        if (authListener != null) authListener.Dispose();
+        Listener.Dispose(ref authListener);
+        Listener.Dispose(ref gogServicesConnectionStateListener);
     }
 
     #endregion
@@ -238,16 +241,43 @@ public class GalaxyManager : MonoBehaviour
 
     /* Signs the current user in to Galaxy services
     NOTE: This call is asynchronus. Sign in result is received by AuthListener. */
-    private void SignIn()
+    public void SignInGalaxy()
     {
-        Debug.Log("Signing user in...");
+        Debug.Log("Signing user in using Galaxy client...");
         try
         {
             GalaxyInstance.User().SignInGalaxy();
         }
         catch (GalaxyInstance.Error e)
         {
-            Debug.LogWarning("SignIn failed for reason " + e);
+            Debug.LogWarning("SignInGalaxy failed for reason " + e);
+        }
+    }
+
+    public void SignInCredentials(string username, string password)
+    {
+        Debug.Log("Signing user in using credentials...");
+        try
+        {
+            GalaxyInstance.User().SignInCredentials(username, password);
+        }
+        catch (GalaxyInstance.Error e)
+        {
+            Debug.LogWarning("SignInCredentials failed for reason " + e);
+        }
+    }
+
+    /* Signs the current user out from Galaxy services */
+    public void SignOut()
+    {
+        Debug.Log("Singing user out...");
+        try
+        {
+            GalaxyInstance.User().SignOut();
+        }
+        catch (GalaxyInstance.Error e)
+        {
+            Debug.LogWarning("SignOut failed for reason " + e);
         }
     }
 
@@ -329,13 +359,27 @@ public class GalaxyManager : MonoBehaviour
         return gameLanguage;
     }
 
+    public void ShowOverlayWithWebPage (string url)
+    {
+        Debug.Log("Opening overlay with web page " + url);
+        try
+        {
+            GalaxyInstance.Utils().ShowOverlayWithWebPage(url);
+            Debug.Log("Opened overlay with web page " + url);
+        }
+        catch (GalaxyInstance.Error e)
+        {
+            Debug.Log("Could not open overlay with web page " + url + " for reason " + e);
+        }
+    }
+
     #endregion
 
     #region Listeners
 
     /* Informs about the event of authenticating user
     Callback for method:
-    SignIn() */
+    SignInGalaxy() */
     public class AuthenticationListener : GlobalAuthListener
     {
         public override void OnAuthSuccess()
@@ -368,6 +412,14 @@ public class GalaxyManager : MonoBehaviour
             if (GameObject.Find("MainMenu") != null) GameObject.Find("MainMenu").GetComponent<MainMenuController>().GalaxyCheck();
         }
 
+    }
+
+    public class GogServicesConnectionStateListener : GlobalGogServicesConnectionStateListener
+    {
+        public override void OnConnectionStateChange(GogServicesConnectionState connected)
+        {
+            Debug.Log("Connection state to GOG services changed to " + connected);
+        }
     }
 
     #endregion

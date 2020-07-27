@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MainController : MonoBehaviour 
 {
@@ -8,4 +6,5 @@ public class MainController : MonoBehaviour
 	{
 		GalaxyManager.Instance.ShutdownMatchmaking();
 	}
+	
 }

@@ -1,6 +1,7 @@
 using System.IO;
 using UnityEngine;
 using Galaxy.Api;
+using Helpers;
 
 public class Storage : MonoBehaviour {
 
@@ -23,26 +24,26 @@ public class Storage : MonoBehaviour {
 	#endregion
 
 	#region Listener methods
-	private void ListenersInit ()
+	private void ListenersInit()
 	{
-		if (fileShareListener == null) fileShareListener = new FileShareListener();
-		if (sharedFileDownloadListener == null) sharedFileDownloadListener = new SharedFileDownloadListener();
-		if (specificUserDataListener == null) specificUserDataListener = new SpecificUserDataListener();
+		Listener.Create(ref fileShareListener);
+		Listener.Create(ref sharedFileDownloadListener);
+		Listener.Create(ref specificUserDataListener);
 	}
 
-	private void ListenersDispose ()
+	private void ListenersDispose()
 	{
-		if (fileShareListener != null) fileShareListener.Dispose();
-		if (sharedFileDownloadListener != null) sharedFileDownloadListener.Dispose();
-		if (specificUserDataListener != null) specificUserDataListener.Dispose();
+		Listener.Dispose(ref fileShareListener);
+		Listener.Dispose(ref sharedFileDownloadListener);
+		Listener.Dispose(ref specificUserDataListener);
 	}
 	#endregion
 
 	#region Methods
 
 	/* This method reads a specified file from your hard-drive and copies it to local storage.
-	This is an example, as in normal scenarios you can use Galaxy SDK FileWrite method to write
-	bytes from memory to a file in local storage, ie. create new files not copy existing ones. */
+	Please note that you can use Galaxy SDK FileWrite method to write bytes from memory to a 
+	file in local storage i.e. create new file instead of copying an existing one. */
 	public void CopyFileToLocalStorage (string absoluteInputPath)
 	{
 		string fileName = null;

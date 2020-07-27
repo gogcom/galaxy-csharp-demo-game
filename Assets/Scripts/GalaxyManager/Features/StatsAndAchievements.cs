@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Galaxy.Api;
+using Helpers;
 
 public class StatsAndAchievements : MonoBehaviour
 {
@@ -32,16 +32,16 @@ public class StatsAndAchievements : MonoBehaviour
 
     private void ListenersInit()
     {
-        if (achievementRetrieveListener == null) achievementRetrieveListener = new UserStatsAndAchievementsRetrieveListener();
-        if (achievementChangeListener == null) achievementChangeListener = new AchievementChangeListener();
-        if (achievementStoreListener == null) achievementStoreListener = new StatsAndAchievementsStoreListener();
+        Listener.Create(ref achievementRetrieveListener);
+        Listener.Create(ref achievementChangeListener);
+        Listener.Create(ref achievementStoreListener);
     }
 
     private void ListenersDispose()
     {
-        if (achievementRetrieveListener != null) achievementRetrieveListener.Dispose();
-        if (achievementChangeListener != null) achievementChangeListener.Dispose();
-        if (achievementStoreListener != null) achievementStoreListener.Dispose();
+        Listener.Dispose(ref achievementStoreListener);
+        Listener.Dispose(ref achievementRetrieveListener);
+        Listener.Dispose(ref achievementChangeListener);
     }
 
     #endregion
