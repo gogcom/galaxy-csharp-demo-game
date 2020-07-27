@@ -17,25 +17,14 @@ public class OnlineWaitController : MonoBehaviour
     void OnEnable()
     {
         lobbyID = GalaxyManager.Instance.Matchmaking.CurrentLobbyID;
-
-        GalaxyManager.Instance.Matchmaking.LobbyBrowsingListenersDispose();
-        GalaxyManager.Instance.Matchmaking.LobbyCreationListenersDispose();
-        GalaxyManager.Instance.Matchmaking.LobbyManagmentMainMenuListenersInit();
-        
-        GalaxyManager.Instance.Friends.SetRichPresence("status", "In online lobby");
-        GalaxyManager.Instance.Friends.SetRichPresence("connect", "--JoinLobby=" + lobbyID);
-
         displayPlayerListCoroutine = DisplayPlayerListCoroutine();
         StartCoroutine(displayPlayerListCoroutine);
     }
 
     void OnDisable()
     {
-        GalaxyManager.Instance.Friends.SetRichPresence("connect", null);
-        startGameButton.GetComponent<Button>().interactable = false;
         StopCoroutine(displayPlayerListCoroutine);
         DisposeEntries();
-        GalaxyManager.Instance.Matchmaking.LobbyManagmentMainMenuListenersDispose();
     }
 
     IEnumerator DisplayPlayerListCoroutine()

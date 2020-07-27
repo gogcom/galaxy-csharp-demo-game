@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Galaxy.Api;
+using Helpers;
 
 public class Matchmaking : MonoBehaviour
 {
@@ -32,7 +32,7 @@ public class Matchmaking : MonoBehaviour
         LobbyCreationListenersDispose();
         LobbyChatListenersDispose();
         LobbyManagmentMainMenuListenersDispose();
-        LobbyManagmentInGameDispose();
+        LobbyManagmentInGameListenersDispose();
     }
 
     #endregion
@@ -88,7 +88,8 @@ public class Matchmaking : MonoBehaviour
     }
 
     // Creates a lobby with specified parameters
-    public void CreateLobby(string gameName, LobbyType lobbyType, uint maxMembers, bool joinable, LobbyTopologyType lobbyTopologyType)
+    public void CreateLobby(string gameName, LobbyType lobbyType, uint maxMembers, bool joinable, 
+        LobbyTopologyType lobbyTopologyType)
     {
         Debug.Log("Creating a lobby");
         try
@@ -148,6 +149,11 @@ public class Matchmaking : MonoBehaviour
             Debug.LogWarning("Could not retrieve lobby " + lobbyID + " owner ID for reason: " + e);
         }
         return lobbyOwnerID;
+    }
+
+    // Checks if user is the lobby owner
+    public bool IsCurrentUserLobbyOwner() {
+        return GalaxyManager.Instance.MyGalaxyID == LobbyOwnerID;
     }
 
     // Gets lobby 'lobbyID' data 'key'
@@ -304,7 +310,8 @@ public class Matchmaking : MonoBehaviour
         }
         catch (GalaxyInstance.Error e)
         {
-            Debug.LogWarning("Could not send invitation to: " + userID + " Connection string: " + connectionString + " for reason: " + e);
+            Debug.LogWarning("Could not send invitation to: " + userID + " Connection string: " + connectionString +
+                " for reason: " + e);
         }
     }
 
@@ -337,16 +344,16 @@ public class Matchmaking : MonoBehaviour
 
     public void LobbyBrowsingListenersInit()
     {
-        lobbyListListenerBrowsing = new LobbyListListenerBrowsing();
-        lobbyDataRetrieveListenerBrowsing = new LobbyDataRetrieveListenerBrowsing();
-        lobbyEnteredListenerBrowsing = new LobbyEnteredListenerBrowsing();
+        Listener.Create(ref lobbyListListenerBrowsing);
+        Listener.Create(ref lobbyDataRetrieveListenerBrowsing);
+        Listener.Create(ref lobbyEnteredListenerBrowsing);
     }
 
     public void LobbyBrowsingListenersDispose()
     {
-        if (lobbyListListenerBrowsing != null) lobbyListListenerBrowsing.Dispose();
-        if (lobbyDataRetrieveListenerBrowsing != null) lobbyDataRetrieveListenerBrowsing.Dispose();
-        if (lobbyEnteredListenerBrowsing != null) lobbyEnteredListenerBrowsing.Dispose();
+        Listener.Dispose(ref lobbyListListenerBrowsing);
+        Listener.Dispose(ref lobbyDataRetrieveListenerBrowsing);
+        Listener.Dispose(ref lobbyEnteredListenerBrowsing);
     }
 
     /* Informs about the event of retrieving the list of available lobbies
@@ -359,37 +366,24 @@ public class Matchmaking : MonoBehaviour
 
         public override void OnLobbyList(uint count, LobbyListResult result)
         {
-            if (result == LobbyListResult.LOBBY_LIST_RESULT_SUCCESS)
+            if (result != LobbyListResult.LOBBY_LIST_RESULT_SUCCESS)
             {
-                LobbyListSuccess(count);
+                Debug.LogWarning("OnLobbyList failure reason: " + result);
+                return;
             }
-            else {
-                LobbyListFailure(result);
-            }
-        }
-
-        private void LobbyListSuccess(uint count)
-        {
             Debug.Log(count + " lobbies OnLobbyList");
             matchmaking.lobbyCount = count;
             if (count == 0)
             {
                 GameObject.Find("OnlineBrowserScreen").GetComponent<OnlineBrowserController>().DisplayLobbyList(null);
+                return;
             }
-            else
+            for (uint i = 0; i < count; i++)
             {
-                for (uint i = 0; i < count; i++)
-                {
-                    GalaxyID lobbyID = GalaxyInstance.Matchmaking().GetLobbyByIndex(i);
-                    Debug.Log("Requesting lobby data for lobby " + i + " with lobbyID " + lobbyID.ToString());
-                    matchmaking.RequestLobbyData(lobbyID);
-                }
+                GalaxyID lobbyID = GalaxyInstance.Matchmaking().GetLobbyByIndex(i);
+                Debug.Log("Requesting lobby data for lobby " + i + " with lobbyID " + lobbyID.ToString());
+                matchmaking.RequestLobbyData(lobbyID);
             }
-        }
-
-        private void LobbyListFailure(LobbyListResult result)
-        {
-            Debug.LogWarning("OnLobbyList failure reason: " + result);
         }
 
     }
@@ -408,38 +402,23 @@ public class Matchmaking : MonoBehaviour
 
         public override void OnLobbyDataRetrieveSuccess(GalaxyID lobbyID)
         {
-            LobbyDataRetrieveSuccess(lobbyID);
-        }
-
-        public override void OnLobbyDataRetrieveFailure(GalaxyID lobbyID, FailureReason failureReason)
-        {
-            LobbyDataRetrieveFailure(failureReason);
-        }
-
-        private void LobbyDataRetrieveSuccess(GalaxyID lobbyID)
-        {
             Debug.Log("Data retrieved for " + lobbiesWithDataRetrievedCount + " lobbies out of " + matchmaking.lobbyCount);
+            string name = GalaxyManager.Instance.Matchmaking.GetLobbyData(lobbyID, "name");
+            string ping = GalaxyManager.Instance.Matchmaking.GetPingWith(lobbyID).ToString();
+            object[] lobbyWithDetails = {name, ping, lobbyID};
+            lobbyListWithDetails.Add(lobbyWithDetails);
             lobbiesWithDataRetrievedCount ++;
-            
-            if (lobbiesWithDataRetrievedCount >= matchmaking.lobbyCount)
+            if (lobbiesWithDataRetrievedCount >= matchmaking.lobbyCount) 
             {
-                string name = GalaxyManager.Instance.Matchmaking.GetLobbyData(lobbyID, "name");
-                string ping = GalaxyManager.Instance.Matchmaking.GetPingWith(lobbyID).ToString();
-                object[] lobbyWithDetails = {name, ping, lobbyID};
-
-                lobbyListWithDetails.Add(lobbyWithDetails);
-
                 GameObject.Find("OnlineBrowserScreen").GetComponent<OnlineBrowserController>().DisplayLobbyList(lobbyListWithDetails);
-
                 lobbiesWithDataRetrievedCount = 0;
                 matchmaking.lobbyCount = 0;
-
                 lobbyListWithDetails.Clear();
                 lobbyListWithDetails.TrimExcess();
             }
         }
 
-        private void LobbyDataRetrieveFailure(FailureReason failureReason)
+        public override void OnLobbyDataRetrieveFailure(GalaxyID lobbyID, FailureReason failureReason)
         {
             Debug.LogWarning("LobbyDataRetrieveListenerBrowsing failure reason: " + failureReason);
         }
@@ -453,38 +432,28 @@ public class Matchmaking : MonoBehaviour
     private class LobbyEnteredListenerBrowsing : ILobbyEnteredListener
     {
         Matchmaking matchmaking = GalaxyManager.Instance.Matchmaking;
+        Friends friends = GalaxyManager.Instance.Friends;
 
         public override void OnLobbyEntered(GalaxyID lobbyID, LobbyEnterResult _result)
         {
-            switch (_result)
+            if (_result != LobbyEnterResult.LOBBY_ENTER_RESULT_SUCCESS) 
             {
-                case LobbyEnterResult.LOBBY_ENTER_RESULT_SUCCESS:
-                    LobbyEnteredSuccess(lobbyID);
-                break;
-                case LobbyEnterResult.LOBBY_ENTER_RESULT_LOBBY_DOES_NOT_EXIST:
-                    LobbyEnteredError("Lobby does not exist");
-                break;
-                case LobbyEnterResult.LOBBY_ENTER_RESULT_LOBBY_IS_FULL:
-                    LobbyEnteredError("Lobby is full");
-                break;
-                case LobbyEnterResult.LOBBY_ENTER_RESULT_ERROR:
-                    LobbyEnteredError("Unspecified error");
-                break;
+                Debug.Log("LobbyEnteredListenerBrowsing failed");
+                GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.OnlineBrowser);
+                GameObject.Find("PopUps").GetComponent<PopUps>().PopUpWithClosePopUpsButton("Could not join lobby\nReason: " +
+                    _result.ToString(), "Back");
+                return;
             }
-        }
-
-        private void LobbyEnteredSuccess(GalaxyID lobbyID)
-        {
+            Debug.Log("LobbyEnteredListenerBrowsing succeded");
             matchmaking.CurrentLobbyID = lobbyID;
             matchmaking.LobbyOwnerID = matchmaking.GetLobbyOwner(lobbyID);
             matchmaking.SetLobbyMemberData("state", "notReady");
             GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.OnlineWait);
-        }
-
-        private void LobbyEnteredError(string reason)
-        {
-            GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.OnlineBrowser);
-            GameObject.Find("PopUps").GetComponent<PopUps>().MenuCouldNotJoin(reason);
+            friends.SetRichPresence("status", "In online lobby");
+            friends.SetRichPresence("connect", "--JoinLobby=" + lobbyID);
+            matchmaking.LobbyManagmentMainMenuListenersInit();
+            matchmaking.LobbyChatListenersInit();
+            matchmaking.LobbyBrowsingListenersDispose();
         }
 
     }
@@ -494,12 +463,12 @@ public class Matchmaking : MonoBehaviour
     #region Lobby creation specific listeners
     public void LobbyCreationListenersInit()
     {
-        lobbyCreatedListener = new LobbyCreatedListener();
+        Listener.Create(ref lobbyCreatedListener);
     }
 
     public void LobbyCreationListenersDispose()
     {
-        if (lobbyCreatedListener != null) lobbyCreatedListener.Dispose();
+        Listener.Dispose(ref lobbyCreatedListener);
     }
 
     /* Informs about the event of creating a lobby
@@ -509,36 +478,30 @@ public class Matchmaking : MonoBehaviour
     private class LobbyCreatedListener : ILobbyCreatedListener
     {
         Matchmaking matchmaking = GalaxyManager.Instance.Matchmaking;
+        Friends friends = GalaxyManager.Instance.Friends;
 
         public override void OnLobbyCreated(GalaxyID lobbyID, LobbyCreateResult _result)
         {
-            switch (_result)
+            if (_result != LobbyCreateResult.LOBBY_CREATE_RESULT_SUCCESS)
             {
-                case LobbyCreateResult.LOBBY_CREATE_RESULT_SUCCESS:
-                    LobbyCreated(lobbyID);
-                break;
-                case LobbyCreateResult.LOBBY_CREATE_RESULT_ERROR:
-                    Timeout();
-                break;
+                Debug.Log("LobbyCreatedListenerCreation failed");
+                GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.OnlineCreate);
+                GameObject.Find("PopUps").GetComponent<PopUps>().PopUpWithClosePopUpsButton("Could not create lobby\nReason: " +
+                    _result.ToString(), "back");
+                return;
             }
-        }
-
-        private void LobbyCreated(GalaxyID lobbyID)
-        {
+            Debug.Log("LobbyCreatedListenerCreation succeded");
             matchmaking.SetLobbyData(lobbyID, "name", matchmaking.lobbyName);
             matchmaking.SetLobbyData(lobbyID, "state", "notReady");
             matchmaking.CurrentLobbyID = lobbyID;
-            matchmaking.LobbyOwnerID = GalaxyInstance.Matchmaking().GetLobbyOwner(lobbyID);
+            matchmaking.LobbyOwnerID = matchmaking.GetLobbyOwner(lobbyID);
             matchmaking.SetLobbyMemberData("state", "notReady");
             GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.OnlineWait);
-            Debug.Log("LobbyCreatedListenerCreation finished");
-        }
-
-        private void Timeout()
-        {
-            GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.OnlineCreate);
-            GameObject.Find("PopUps").GetComponent<PopUps>().MenuCouldNotCreate();
-            Debug.Log("LobbyCreatedListenerCreation finished");
+            friends.SetRichPresence("status", "In online lobby");
+            friends.SetRichPresence("connect", "--JoinLobby=" + lobbyID);
+            matchmaking.LobbyManagmentMainMenuListenersInit();
+            matchmaking.LobbyChatListenersInit();
+            matchmaking.LobbyCreationListenersDispose();
         }
 
     }
@@ -549,16 +512,16 @@ public class Matchmaking : MonoBehaviour
 
     public void LobbyManagmentInGameListenersInit() 
     {
-        lobbyDataListenerInGame = new LobbyDataListenerInGame();
-        lobbyLeftListenerInGame = new LobbyLeftListenerInGame();
-        lobbyMemberStateListenerInGame = new LobbyMemberStateListenerInGame();
+        Listener.Create(ref lobbyDataListenerInGame);
+        Listener.Create(ref lobbyLeftListenerInGame);
+        Listener.Create(ref lobbyMemberStateListenerInGame);
     }
 
-    public void LobbyManagmentInGameDispose()
+    public void LobbyManagmentInGameListenersDispose()
     {
-        if (lobbyDataListenerInGame != null) lobbyDataListenerInGame.Dispose();
-        if (lobbyLeftListenerInGame != null) lobbyLeftListenerInGame.Dispose();
-        if (lobbyMemberStateListenerInGame != null) lobbyMemberStateListenerInGame.Dispose();
+        Listener.Dispose(ref lobbyDataListenerInGame);
+        Listener.Dispose(ref lobbyLeftListenerInGame);
+        Listener.Dispose(ref lobbyMemberStateListenerInGame);
     }
 
     /* Informs about the event of receiving specified lobby or lobby member data
@@ -574,18 +537,14 @@ public class Matchmaking : MonoBehaviour
         public override void OnLobbyDataUpdated(GalaxyID lobbyID, GalaxyID memberID)
         {
             Debug.Log("LobbyID: " + lobbyID + "\nMemberID: " + memberID);
-            if (memberID == new GalaxyID(0))
+            if (memberID.IsValid())
             {
-                LobbyDataUpdated(lobbyID);
+                if (AllMembersGo(lobbyID) && matchmaking.IsCurrentUserLobbyOwner())
+                {
+                    matchmaking.SetLobbyData(lobbyID, "state", "go");
+                }
+                return;
             }
-            else
-            {
-                LobbyMemberDataUpdated(lobbyID, memberID);
-            }
-        }
-
-        void LobbyDataUpdated(GalaxyID lobbyID)
-        {
             if (matchmaking.GetLobbyData(lobbyID, "state") == "go")
             {
                 GameObject.Find("GameManager").GetComponent<Online2PlayerGameManager>().enabled = true;
@@ -593,30 +552,19 @@ public class Matchmaking : MonoBehaviour
             }
         }
 
-        void LobbyMemberDataUpdated(GalaxyID lobbyID, GalaxyID memberID)
+        bool AllMembersGo(GalaxyID lobbyID)
         {
-            if (AllMembersGo(lobbyID, memberID) && GalaxyManager.Instance.MyGalaxyID == matchmaking.LobbyOwnerID)
+            uint lobbyMembersCount = matchmaking.GetNumLobbyMembers(lobbyID);
+            if (lobbyMembersCount < 2)
+                return false;
+            for (uint i = 0; i < lobbyMembersCount; i++)
             {
-                matchmaking.SetLobbyData(lobbyID, "state", "go");
+                if (matchmaking.GetLobbyMemberData(matchmaking.GetLobbyMemberByIndex(lobbyID, i), "state") != "go")
+                    return false;
             }
+            return true;
         }
-
-        bool AllMembersGo(GalaxyID lobbyID, GalaxyID memberID)
-        {
-            uint go = 0;
-
-            for (uint i = 0; i < 2; i++)
-            {
-                if (matchmaking.GetLobbyMemberData(matchmaking.GetLobbyMemberByIndex(lobbyID, i), "state") == "go")
-                {
-                    go++;
-                }
-            }
-
-            return (go == 2) ? true : false;
-
-        }
-
+        
     }
 
     /* Informs about the event of leaving a lobby 
@@ -628,48 +576,15 @@ public class Matchmaking : MonoBehaviour
         Matchmaking matchmaking = GalaxyManager.Instance.Matchmaking;
         public override void OnLobbyLeft(GalaxyID lobbyID, LobbyLeaveReason leaveReason)
         {
-            switch(leaveReason)
-            {
-                case LobbyLeaveReason.LOBBY_LEAVE_REASON_USER_LEFT:
-                    UserLeftLobby(lobbyID);
-                break;
-                case LobbyLeaveReason.LOBBY_LEAVE_REASON_LOBBY_CLOSED:
-                    if (!GameObject.Find("Online2PlayerGameEnd")) HostLeftLobby();
-                break;
-                case LobbyLeaveReason.LOBBY_LEAVE_REASON_CONNECTION_LOST:
-                    if (!GameObject.Find("Online2PlayerGameEnd")) ConnectionToLobbyLost();
-                break;
-                default:
-                    Debug.LogWarning("OnLobbyLeft failure");
-                break;
-            }
-            LobbyLeft();
-        }
-
-        void HostLeftLobby()
-        {
-            Debug.Log("Host left the lobby");
-            GameObject.Find("PopUps").GetComponent<PopUps>().GameHostLeftLobby();
-        }
-
-        void ConnectionToLobbyLost()
-        {
-            Debug.Log("Connection to lobby lost");
-            GameObject.Find("PopUps").GetComponent<PopUps>().ConnectionToLobbyLost();
-        }
-
-        void UserLeftLobby(GalaxyID lobbyID)
-        {
-            Debug.Log("User left lobby " + lobbyID);
-        }
-
-        void LobbyLeft()
-        {
+            if (leaveReason != LobbyLeaveReason.LOBBY_LEAVE_REASON_USER_LEFT)
+                GameObject.Find("PopUps").GetComponent<PopUps>().PopUpWithLoadSceneButton("Connection to lobby lost\nReason: " +
+                    leaveReason, "Back");
             matchmaking.CurrentLobbyID = null;
             matchmaking.LobbyOwnerID = null;
             GameManager.Instance.GameFinished = true;
             GalaxyManager.Instance.ShutdownNetworking();
-            matchmaking.LobbyManagmentInGameDispose();
+            matchmaking.LobbyManagmentInGameListenersDispose();
+            matchmaking.LobbyChatListenersDispose();
         }
 
     }
@@ -680,17 +595,13 @@ public class Matchmaking : MonoBehaviour
     {
         public override void OnLobbyMemberStateChanged(GalaxyID lobbyID, GalaxyID memberID, LobbyMemberStateChange memberStateChange)
         {
-            Debug.Log(string.Format("OnLobbyMemberStateChanged lobbyID: {0} memberID: {1} change: {2}", lobbyID, memberID, memberStateChange));
-            if (memberStateChange != LobbyMemberStateChange.LOBBY_MEMBER_STATE_CHANGED_ENTERED)
+            Debug.Log("OnLobbyMemberStateChanged lobbyID: " + lobbyID + " memberID: " + memberID + " change: " + memberStateChange);
+            if (memberStateChange != LobbyMemberStateChange.LOBBY_MEMBER_STATE_CHANGED_ENTERED &&
+                GameObject.Find("Online2PlayerGameEnd") == null)
             {
-                if (!GameObject.Find("Online2PlayerGameEnd")) ClientLeftLobby();
+                GameObject.Find("PopUps").GetComponent<PopUps>().PopUpWithLeaveLobbyButton("Other player left lobby", "Back");
+                GameManager.Instance.GameFinished = true;
             }
-        }
-
-        private void ClientLeftLobby()
-        {
-            GameObject.Find("PopUps").GetComponent<PopUps>().GameClientLeftLobby();
-            GameManager.Instance.GameFinished = true;
         }
 
     }
@@ -701,14 +612,16 @@ public class Matchmaking : MonoBehaviour
 
     public void LobbyManagmentMainMenuListenersInit() 
     {
-        lobbyLeftListenerMainMenu = new LobbyLeftListenerMainMenu();
-        lobbyDataListenerMainMenu = new LobbyDataListenerMainMenu();
+        Listener.Create(ref lobbyLeftListenerMainMenu);
+        Listener.Create(ref lobbyDataListenerMainMenu);
+        Listener.Create(ref lobbyMemberStateListenerMainMenu);
     }
 
     public void LobbyManagmentMainMenuListenersDispose()
     {
-        if (lobbyLeftListenerMainMenu != null) lobbyLeftListenerMainMenu.Dispose();
-        if (lobbyDataListenerMainMenu != null) lobbyDataListenerMainMenu.Dispose();
+        Listener.Dispose(ref lobbyLeftListenerMainMenu);
+        Listener.Dispose(ref lobbyDataListenerMainMenu);
+        Listener.Dispose(ref lobbyMemberStateListenerMainMenu);
     }
 
     /* Informs about the event of receiving specified lobby or lobby member data
@@ -720,64 +633,46 @@ public class Matchmaking : MonoBehaviour
     private class LobbyDataListenerMainMenu : GlobalLobbyDataListener
     {
         Matchmaking matchmaking = GalaxyManager.Instance.Matchmaking;
+        Friends friends = GalaxyManager.Instance.Friends;
 
         public override void OnLobbyDataUpdated(GalaxyID lobbyID, GalaxyID memberID)
         {
             Debug.Log("LobbyID: " + lobbyID + "\nMemberID: " + memberID);
-            if (memberID == new GalaxyID(0))
+            if (memberID.IsValid())
             {
-                LobbyDataUpdatedReady(lobbyID);
-                LobbyDataUpdatedSteady(lobbyID);
+                if (matchmaking.IsCurrentUserLobbyOwner())
+                {
+                    matchmaking.SetLobbyData(lobbyID, "state", AllMembersReady(lobbyID) ? "ready" : "notReady");
+                }
+                return;
             }
-            else
-            {
-                LobbyMemberDataUpdatedReady(lobbyID);
-            }
-        }
 
-        void LobbyDataUpdatedReady(GalaxyID lobbyID)
-        {
-            if (matchmaking.GetLobbyData(lobbyID, "state") == "ready" && GalaxyManager.Instance.MyGalaxyID == matchmaking.LobbyOwnerID)
-            {
-                GameObject.Find("OnlineWaitScreen").GetComponent<OnlineWaitController>().startGameButton.GetComponent<Button>().interactable = true;
-            }
-            else
-            {
-                GameObject.Find("OnlineWaitScreen").GetComponent<OnlineWaitController>().startGameButton.GetComponent<Button>().interactable = false;
-            }
-        }
+            GameObject.Find("OnlineWaitScreen").GetComponent<OnlineWaitController>().startGameButton.GetComponent<Button>().
+                interactable = (matchmaking.GetLobbyData(lobbyID, "state") == "ready" &&
+                matchmaking.IsCurrentUserLobbyOwner());
 
-        void LobbyDataUpdatedSteady(GalaxyID lobbyID)
-        {
             if (matchmaking.GetLobbyData(lobbyID, "state") == "steady")
             {
                 Debug.Assert(matchmaking.GetLobbyMemberData(GalaxyManager.Instance.MyGalaxyID, "state") == "ready");
                 matchmaking.SetLobbyMemberData("state", "steady");
+                friends.SetRichPresence("connect", null);
+                matchmaking.LobbyManagmentMainMenuListenersDispose();
                 matchmaking.LobbyManagmentInGameListenersInit();
                 SceneController.Instance.LoadScene(SceneController.SceneName.Online2PlayerGame, true);
             }
         }
 
-        void LobbyMemberDataUpdatedReady(GalaxyID lobbyID)
-        {
-            if (GalaxyManager.Instance.MyGalaxyID == matchmaking.LobbyOwnerID)
-            {
-                matchmaking.SetLobbyData(lobbyID, "state", AllMembersReady(lobbyID) ? "ready" : "notReady");
-            }
-        }
-
         bool AllMembersReady(GalaxyID lobbyID)
         {
-            uint ready = 0;
             uint lobbyMembersCount = matchmaking.GetNumLobbyMembers(lobbyID);
+            if (lobbyMembersCount < 2)
+                return false;
             for (uint i = 0; i < lobbyMembersCount; i++)
             {
-                if (matchmaking.GetLobbyMemberData(matchmaking.GetLobbyMemberByIndex(lobbyID, i), "state") == "ready")
-                {
-                    ready++;
-                }
+                if (matchmaking.GetLobbyMemberData(matchmaking.GetLobbyMemberByIndex(lobbyID, i), "state") != "ready")
+                    return false;
             }
-            return (ready == 2) ? true : false;
+            return true;
         }
     }
 
@@ -788,46 +683,36 @@ public class Matchmaking : MonoBehaviour
     private class LobbyLeftListenerMainMenu : GlobalLobbyLeftListener
     {
         Matchmaking matchmaking = GalaxyManager.Instance.Matchmaking;
+        Friends friends = GalaxyManager.Instance.Friends;
         public override void OnLobbyLeft(GalaxyID lobbyID, LobbyLeaveReason leaveReason)
         {
-            switch(leaveReason)
-            {
-                case LobbyLeaveReason.LOBBY_LEAVE_REASON_USER_LEFT:
-                    UserLeftLobby(lobbyID);
-                break;
-                case LobbyLeaveReason.LOBBY_LEAVE_REASON_LOBBY_CLOSED:
-                    HostClosedLobby();
-                break;
-                case LobbyLeaveReason.LOBBY_LEAVE_REASON_CONNECTION_LOST:
-                    HostClosedLobby();
-                break;
-                default:
-                    Debug.LogWarning("OnLobbyLeft failure");
-                break;
-            }
-        }
-
-        void HostClosedLobby()
-        {
-            Debug.Log("Host left the lobby");
-            GameObject.Find("PopUps").GetComponent<PopUps>().MenuHostLeftLobby();
-            LobbyLeft();
-            GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.Online);
-        }
-
-        void UserLeftLobby(GalaxyID lobbyID)
-        {
-            Debug.Log("Lobby " + lobbyID + " left");
-            LobbyLeft();
-            GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.Online);
-        }
-
-        void LobbyLeft()
-        {
+            if (leaveReason != LobbyLeaveReason.LOBBY_LEAVE_REASON_USER_LEFT)
+                GameObject.Find("PopUps").GetComponent<PopUps>().PopUpWithClosePopUpsButton("Host left the lobby", "Back");
             matchmaking.CurrentLobbyID = null;
             matchmaking.LobbyOwnerID = null;
-            matchmaking.LobbyManagmentMainMenuListenersDispose();
             matchmaking.lobbyName = "";
+            friends.SetRichPresence("connect", null);
+            GameObject.Find("OnlineChat").GetComponent<ChatController>().DisposeEntries();
+            GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.Online);
+            matchmaking.LobbyManagmentMainMenuListenersDispose();
+            matchmaking.LobbyChatListenersDispose();
+        }
+
+    }
+
+    /* Informs about the event of lobby member state change */
+    private LobbyMemberStateListenerMainMenu lobbyMemberStateListenerMainMenu;
+    private class LobbyMemberStateListenerMainMenu : GlobalLobbyMemberStateListener
+    {
+        Matchmaking matchmaking = GalaxyManager.Instance.Matchmaking;
+        public override void OnLobbyMemberStateChanged(GalaxyID lobbyID, GalaxyID memberID, LobbyMemberStateChange memberStateChange)
+        {
+            Debug.Log("OnLobbyMemberStateChanged lobbyID: " + lobbyID + " memberID: " + memberID + " change: " + memberStateChange);
+            if (memberStateChange != LobbyMemberStateChange.LOBBY_MEMBER_STATE_CHANGED_ENTERED)
+            {
+                matchmaking.SetLobbyData(lobbyID, "state", "notReady");
+                matchmaking.SetLobbyMemberData("state", "notReady");
+            }
         }
 
     }
@@ -837,38 +722,34 @@ public class Matchmaking : MonoBehaviour
     #region Lobby chat global listeners
 
     public void LobbyChatListenersInit() {
-        chatLobbyMessageListener = new LobbyMessageListenerChat();
+        Listener.Create(ref lobbyMessageListenerChat);
     }
 
     public void LobbyChatListenersDispose() {
-        if (chatLobbyMessageListener != null) chatLobbyMessageListener.Dispose();
+        Listener.Dispose(ref lobbyMessageListenerChat);
     }
 
 	// Lobby message listener
-    public LobbyMessageListenerChat chatLobbyMessageListener;
+    public LobbyMessageListenerChat lobbyMessageListenerChat;
     public class LobbyMessageListenerChat : GlobalLobbyMessageListener
     {
         public List<Dictionary<string, string>> chatLobbyMessageHistory = new List<Dictionary<string, string>>();
         private Matchmaking matchmaking = GalaxyManager.Instance.Matchmaking;
+        private Friends friends = GalaxyManager.Instance.Friends;
         string message = null;
 
         public override void OnLobbyMessageReceived(GalaxyID lobbyID, GalaxyID senderID, uint messageID, uint messageLength)
         {
             Dictionary<string, string> messageAndSenderDict = new Dictionary<string, string>();
-            try
-            {
-                Debug.Log("Lobby " + lobbyID + " Sender " + senderID + " message " + message);
-                message = matchmaking.GetLobbyMessage(GalaxyManager.Instance.Matchmaking.CurrentLobbyID, ref senderID, messageID);
-                messageAndSenderDict.Add("sender", GalaxyManager.Instance.Friends.GetFriendPersonaName(senderID));
-                messageAndSenderDict.Add("message", message);
-                chatLobbyMessageHistory.Add(messageAndSenderDict);
-                Debug.Log("New message from " + GalaxyManager.Instance.Friends.GetFriendPersonaName(senderID) + " to lobbyID " + lobbyID + ": " + message);
-                if (GameManager.Instance != null) ((Online2PlayerGameManager)GameManager.Instance).PopChatPrompt();
-            }
-            catch (GalaxyInstance.Error e)
-            {
-                Debug.LogWarning(e);
-            }
+            ChatController chatMenuController = GameObject.Find("OnlineChat").GetComponent<ChatController>();
+            Debug.Log("Message from lobby: \'" + lobbyID + "\', sender: \'" + senderID + "\', with value: \'" + message +
+                "\' received.");
+            message = matchmaking.GetLobbyMessage(matchmaking.CurrentLobbyID, ref senderID, messageID);
+            messageAndSenderDict.Add("sender", friends.GetFriendPersonaName(senderID));
+            messageAndSenderDict.Add("message", message);
+            chatLobbyMessageHistory.Add(messageAndSenderDict);
+            if (chatMenuController != null) chatMenuController.DisplayChatMessage(messageAndSenderDict);
+            if (GameManager.Instance != null) ((Online2PlayerGameManager)GameManager.Instance).PopChatPrompt();
         }
     }
 

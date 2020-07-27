@@ -2,6 +2,7 @@
 using UnityEngine;
 using Galaxy.Api;
 using System.Collections;
+using Helpers;
 
 public class Networking : MonoBehaviour
 {
@@ -51,13 +52,13 @@ public class Networking : MonoBehaviour
     // Istantiantes listeners
     private void ListenersInit()
     {
-        networkListener = new NetworkingListener();
+        Listener.Create(ref networkListener);
     }
 
     // Disposes listeners
     private void ListenersDispose()
     {
-        if (networkListener != null) networkListener.Dispose();
+        Listener.Dispose(ref networkListener);
     }
 
     #endregion
@@ -82,7 +83,7 @@ public class Networking : MonoBehaviour
     // Prepares a byte array with information on players shot and sends it using SendP2PPacket method
     public void SendPacketWithPlayerShot(GameManager.FoulEnum foul, GameManager.BallColorEnum ballOn, int shotScore)
     {
-        Debug.Log("Packet position sent");
+        Debug.Log("Packet switch sent");
         
         SendPacketWithBallPositions();
         GetBytesFromInt((int)foul, 0, ref switchPacketBuffer);

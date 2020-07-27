@@ -2,6 +2,7 @@
 using Galaxy.Api;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using Helpers;
 
 public class Friends : MonoBehaviour
 {
@@ -41,14 +42,14 @@ public class Friends : MonoBehaviour
 
     private void ListenersInit()
     {
-        friendListListener = new FriendListListener();
-        richPresenceChangeListener = new RichPresenceChangeListener();
+        Listener.Create(ref friendListListener);
+        Listener.Create(ref richPresenceChangeListener);
     }
 
     private void ListenersDispose()
     {
-        if (friendListListener != null) friendListListener.Dispose();
-        if (richPresenceChangeListener != null) richPresenceChangeListener.Dispose();
+        Listener.Dispose(ref friendListListener);
+        Listener.Dispose(ref richPresenceChangeListener);
     }
 
     // Sets the user rich presence based on the currently loaded scene name

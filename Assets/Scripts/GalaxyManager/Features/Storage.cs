@@ -1,6 +1,7 @@
 using System.IO;
 using UnityEngine;
 using Galaxy.Api;
+using Helpers;
 
 public class Storage : MonoBehaviour {
 
@@ -23,18 +24,18 @@ public class Storage : MonoBehaviour {
 	#endregion
 
 	#region Listener methods
-	private void ListenersInit ()
+	private void ListenersInit()
 	{
-		fileShareListener = new FileShareListener();
-		sharedFileDownloadListener = new SharedFileDownloadListener();
-		specificUserDataListener = new SpecificUserDataListener();
+		Listener.Create(ref fileShareListener);
+		Listener.Create(ref sharedFileDownloadListener);
+		Listener.Create(ref specificUserDataListener);
 	}
 
-	private void ListenersDispose ()
+	private void ListenersDispose()
 	{
-		if (fileShareListener != null) fileShareListener.Dispose();
-		if (sharedFileDownloadListener != null) sharedFileDownloadListener.Dispose();
-		if (specificUserDataListener != null) specificUserDataListener.Dispose();
+		Listener.Dispose(ref fileShareListener);
+		Listener.Dispose(ref sharedFileDownloadListener);
+		Listener.Dispose(ref specificUserDataListener);
 	}
 	#endregion
 

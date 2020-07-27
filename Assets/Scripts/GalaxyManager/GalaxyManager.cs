@@ -1,6 +1,7 @@
 using UnityEngine;
 using Galaxy.Api;
 using System.Collections.Generic;
+using Helpers;
 
 public class GalaxyManager : MonoBehaviour
 {
@@ -84,7 +85,6 @@ public class GalaxyManager : MonoBehaviour
         else 
         {
             Destroy(this);
-            return;
         }
     }
 
@@ -123,14 +123,14 @@ public class GalaxyManager : MonoBehaviour
 
     private void ListenersInit()
     {
-        authListener = new AuthenticationListener();
-        gogServicesConnectionStateListener = new GogServicesConnectionStateListener();
+        Listener.Create(ref authListener);
+        Listener.Create(ref gogServicesConnectionStateListener);
     }
 
-    void ListenersDispose()
+    private void ListenersDispose()
     {
-        if (authListener != null) authListener.Dispose();
-        if (gogServicesConnectionStateListener != null) gogServicesConnectionStateListener.Dispose();
+        Listener.Dispose(ref authListener);
+        Listener.Dispose(ref gogServicesConnectionStateListener);
     }
 
     #endregion

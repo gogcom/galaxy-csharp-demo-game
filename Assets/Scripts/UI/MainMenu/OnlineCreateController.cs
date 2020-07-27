@@ -17,7 +17,8 @@ public class OnlineCreateController : MonoBehaviour
     // Creates lobby
     public void CreateLobby()
     {
-        LobbyTopologyType lobbyTopologyTypeFCM = Galaxy.Api.LobbyTopologyType.LOBBY_TOPOLOGY_TYPE_STAR;
+        LobbyTopologyType lobbyTopologyTypeFCM = 
+            Galaxy.Api.LobbyTopologyType.LOBBY_TOPOLOGY_TYPE_STAR;
         uint maxMembers = 2;
         LobbyType lobbyPrivacy;
         if (gameName.text == "")
@@ -27,19 +28,14 @@ public class OnlineCreateController : MonoBehaviour
             message.gameObject.SetActive(true);
             return;
         }
-        else 
-        {
-            if (privacy.isOn)
-            {
-                lobbyPrivacy = Galaxy.Api.LobbyType.LOBBY_TYPE_PRIVATE;
-            }
-            else {
-                lobbyPrivacy = Galaxy.Api.LobbyType.LOBBY_TYPE_PUBLIC;
-            }
-            GalaxyManager.Instance.Matchmaking.CreateLobby(gameName.text, lobbyPrivacy, maxMembers, true, lobbyTopologyTypeFCM);
-            message.gameObject.SetActive(false);
-            GameObject.Find("MainMenu").GetComponent<MainMenuController>().SwitchMenu(MainMenuController.MenuEnum.OnlineCreating);
-        }
+        lobbyPrivacy = privacy.isOn?
+            Galaxy.Api.LobbyType.LOBBY_TYPE_PRIVATE:
+            Galaxy.Api.LobbyType.LOBBY_TYPE_PUBLIC;
+        GalaxyManager.Instance.Matchmaking.CreateLobby(gameName.text, lobbyPrivacy, 
+            maxMembers, true, lobbyTopologyTypeFCM);
+        message.gameObject.SetActive(false);
+        GameObject.Find("MainMenu").GetComponent<MainMenuController>().
+            SwitchMenu(MainMenuController.MenuEnum.OnlineCreating);
     }
 
 }

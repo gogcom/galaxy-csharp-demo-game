@@ -85,24 +85,23 @@ public class Local2PlayerGameManager : GameManager
         if (foul == FoulEnum.Clear && shotBallsPut.Capacity != 0)
         {
             ActivePlayer.PlayerState = PlayerState.ActiveClear;
+            return;
         }
-        else
-        {
-            tempPlayer = PassivePlayer;
-            PassivePlayer = ActivePlayer;
-            ActivePlayer = tempPlayer;
 
-            PassivePlayer.PlayerState = PlayerState.Passive;
-            
-            if (foul == FoulEnum.WhiteInHole)
-            {
-                ActivePlayer.PlayerState = PlayerState.ActiveWIH;
-            }
-            else {
-                ActivePlayer.PlayerState = PlayerState.ActiveClear;
-            }
-            CurrentCameraPositionType = CurrentCameraPositionType;
+        tempPlayer = PassivePlayer;
+        PassivePlayer = ActivePlayer;
+        ActivePlayer = tempPlayer;
+        PassivePlayer.PlayerState = PlayerState.Passive;
+        
+        if (foul == FoulEnum.WhiteInHole)
+        {
+            ActivePlayer.PlayerState = PlayerState.ActiveWIH;
         }
+        else 
+        {
+            ActivePlayer.PlayerState = PlayerState.ActiveClear;
+        }
+        CurrentCameraPositionType = CurrentCameraPositionType;
     }
 
     public override void GameEnd()

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Galaxy.Api;
+using Helpers;
 
 public class Leaderboards : MonoBehaviour
 {
@@ -37,17 +38,17 @@ public class Leaderboards : MonoBehaviour
     // Instantiates listeners 
     private void ListenersInit()
     {
-        leadRetrieveListener = new LeaderboardsRetrieveListener();
-        leadEntriesRetrieveListener = new LeaderboardEntriesRetrieveListener();
-        leadScoreUpdateListener = new LeaderboardScoreUpdateListener();
+        Listener.Create(ref leadRetrieveListener);
+        Listener.Create(ref leadEntriesRetrieveListener);
+        Listener.Create(ref leadScoreUpdateListener);
     }
 
     // Disposes listeners
     private void ListenersDispose()
     {
-        if (leadRetrieveListener != null) leadRetrieveListener.Dispose();
-        if (leadEntriesRetrieveListener != null) leadEntriesRetrieveListener.Dispose();
-        if (leadScoreUpdateListener != null) leadScoreUpdateListener.Dispose();
+        Listener.Dispose(ref leadRetrieveListener);
+        Listener.Dispose(ref leadEntriesRetrieveListener);
+        Listener.Dispose(ref leadScoreUpdateListener);
     }
 
     #endregion
