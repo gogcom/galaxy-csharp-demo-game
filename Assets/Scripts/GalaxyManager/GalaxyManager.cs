@@ -384,9 +384,9 @@ public class GalaxyManager : MonoBehaviour
     {
         public override void OnAuthSuccess()
         {
-            Debug.Log("Successfully signed in");
-
             myGalaxyID = GalaxyInstance.User().GetGalaxyID();
+
+            Debug.Log("Successfully signed in as user: " + myGalaxyID);
 
             GalaxyManager.Instance.StartStatsAndAchievements();
             GalaxyManager.Instance.StartFriends();
