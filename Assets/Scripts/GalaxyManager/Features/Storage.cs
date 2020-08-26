@@ -155,20 +155,6 @@ public class Storage : MonoBehaviour {
 		return null;
 	}
 
-	/* Download shared file using it's SharedFileID */
-	public void DownloadSharedFile(ulong sharedFileID)
-	{
-		if (sharedFileID == 0) return;
-		try
-		{
-			GalaxyInstance.Storage().DownloadSharedFile(sharedFileID);
-		}
-		catch (GalaxyInstance.Error e)
-		{
-			Debug.LogWarning("Could not download shared file for reason " + e);
-		}
-	}
-
 	/* Gets a SharedFileID for a file with a specified name. This uses the User
 	interface to read and return a value of a specified user data key. */
 	public ulong GetSharedFileIDFromUser(GalaxyID userID, string fileName)
@@ -187,17 +173,35 @@ public class Storage : MonoBehaviour {
 		return sharedFileID;
 	}
 
-	/* Downloads a file share */
-	public void DownloadSharedFileFromUser(GalaxyID userID, string fileName)
+	/* Downloads a shared file by the userID of the file owner and its name
+	This function will set the fileName var in the specificUserDataListener,
+	set the userID var in the sharedFileDownloadListener, and request data
+	of the file owner so that we can grab the fileSharedID */
+	public void DownloadSharedFileByUserIdAndFileName(GalaxyID userID, string fileName)
 	{
-		specificUserDataListener.sharedFileID = GetSharedFileIDFromUser(userID, fileName);
+		specificUserDataListener.fileName = fileName;
+		sharedFileDownloadListener.userID = userID.ToString();
 		try
 		{
-			GalaxyInstance.User().RequestUserData(userID);
+			GalaxyInstance.User().RequestUserData(userID, specificUserDataListener);
 		}
 		catch (GalaxyInstance.Error e)
 		{
 			Debug.Log("Could not request user data for reason " + e);
+		}
+	}
+
+	/* Download shared file using its SharedFileID */
+	public void DownloadSharedFileBySharedFileID(ulong sharedFileID)
+	{
+		if (sharedFileID == 0) return;
+		try
+		{
+			GalaxyInstance.Storage().DownloadSharedFile(sharedFileID);
+		}
+		catch (GalaxyInstance.Error e)
+		{
+			Debug.LogWarning("Could not download shared file for reason " + e);
 		}
 	}
 	
@@ -214,17 +218,6 @@ public class Storage : MonoBehaviour {
 	{
 		public override void OnFileShareSuccess(string fileName, ulong sharedFileID)
 		{
-			AssignSharedFileIDToUser(fileName, sharedFileID);
-			Debug.Log("File " + fileName + " was shared and assigned ID " + sharedFileID);
-		}
-
-		public override void OnFileShareFailure(string fileName, FailureReason failureReason)
-		{
-			Debug.Log("Failed to share file " + fileName + " for reason " + failureReason);
-		}
-
-		void AssignSharedFileIDToUser (string fileName, ulong sharedFileID) 
-		{
 			try
 			{
 				GalaxyInstance.User().SetUserData(fileName, sharedFileID.ToString());
@@ -233,6 +226,12 @@ public class Storage : MonoBehaviour {
 			{
 				Debug.LogWarning("Could not assign file " + fileName + " to user for reason " + e);
 			}
+			Debug.Log("File " + fileName + " was shared and assigned ID " + sharedFileID);
+		}
+
+		public override void OnFileShareFailure(string fileName, FailureReason failureReason)
+		{
+			Debug.Log("Failed to share file " + fileName + " for reason " + failureReason);
 		}
 	}
 
@@ -241,57 +240,51 @@ public class Storage : MonoBehaviour {
 	and then closing the file to free up memory.*/
 	public class SharedFileDownloadListener : GlobalSharedFileDownloadListener 
 	{
-		public string userID = null;
+		public string userID = "0";
 		public override void OnSharedFileDownloadSuccess(ulong sharedFileID, string fileName)
 		{
-			Debug.Log("File with ID " + sharedFileID + " downloaded, written with name " + fileName);
-			DownloadedSharedFileWrite(sharedFileID, fileName);
-			userID = null;
-		}
-
-		public override void OnSharedFileDownloadFailure(ulong sharedFileID, FailureReason failureReason)
-		{
-			Debug.Log("Failed to download file with ID " + sharedFileID + " for reason " + failureReason);
-			userID = null;
-		}
-
-		void DownloadedSharedFileWrite (ulong sharedFileID, string fileName)
-		{	
+			Debug.Log("Shared file with ID " + sharedFileID + " downloaded. Proceeding to write the file ");
 			try
 			{
 				uint downloadedSharedFileSize = GalaxyInstance.Storage().GetSharedFileSize(sharedFileID);
 				byte[] downloadedSharedFileBuffer = new byte [downloadedSharedFileSize];
-				if (userID != null)
-				{
-					GalaxyInstance.Storage().SharedFileRead(sharedFileID, downloadedSharedFileBuffer, downloadedSharedFileSize);
-					string saveFileName = userID + "/" + fileName;
-					GalaxyInstance.Storage().FileWrite(saveFileName, downloadedSharedFileBuffer, downloadedSharedFileSize);
-					GalaxyInstance.Storage().SharedFileClose(sharedFileID);
-					userID = null;
-				}
-				else
-				{
-					Debug.LogWarning("Failed to download file with ID " + sharedFileID + " because SharedFileDownloadListener.userID is null");
-				}
+				string saveFileName = userID + "/" + fileName;
+				GalaxyInstance.Storage().SharedFileRead(sharedFileID, downloadedSharedFileBuffer, downloadedSharedFileSize);
+				GalaxyInstance.Storage().FileWrite(saveFileName, downloadedSharedFileBuffer, downloadedSharedFileSize);
+				Debug.Log("Downloaded shared file written to: " + saveFileName);
 			}
 			catch (GalaxyInstance.Error e)
 			{
 				Debug.LogWarning(e);
 			}
+			finally {
+				GalaxyInstance.Storage().SharedFileClose(sharedFileID);
+				userID = "0";
+			}
+		}
+
+		public override void OnSharedFileDownloadFailure(ulong sharedFileID, FailureReason failureReason)
+		{
+			Debug.Log("Failed to download file with ID " + sharedFileID + " for reason " + failureReason);
+			userID = "0";
 		}
 	}
 
-	/* This listener is used in pair with GetSharedFileIDFromUser. 
-	We ask backends for user data to retrieve sharedFileID */
-	public class SpecificUserDataListener : GlobalSpecificUserDataListener
+	/* This specific listener is used in pair with DownloadSharedFileByUserIdAndFileName method, because
+	before we can retrieve the sharedFileID from users data we need to request that data first. Once we
+	get the requested data we check the sharedFileID for the given userID and file name and download the file.*/
+	public class SpecificUserDataListener : ISpecificUserDataListener
 	{
-		public ulong sharedFileID = 0;
-		private Storage storage = GalaxyManager.Instance.Storage;
+		public string fileName = "";
+		private ulong sharedFileID = 0;
 
 		public override void OnSpecificUserDataUpdated(GalaxyID userID)
 		{
 			Debug.Log("User " + userID + " data received");
-			storage.DownloadSharedFile(sharedFileID);
+			sharedFileID = GalaxyManager.Instance.Storage.GetSharedFileIDFromUser(userID, fileName);
+			GalaxyManager.Instance.Storage.DownloadSharedFileBySharedFileID(sharedFileID);
+			fileName = "";
+			sharedFileID = 0;
 		}
 
 	}

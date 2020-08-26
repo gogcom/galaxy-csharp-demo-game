@@ -395,7 +395,7 @@ public class DebugController : MonoBehaviour {
 	*	STORAGE		*
 	****************/
 	bool storageWindowEnabled = false;
-	Rect storageWindowRect = new Rect(600,20,335,195);
+	Rect storageWindowRect = new Rect(600,20,335,220);
 	string inputFileWriteTarget = "absolutInputPath";
 	string fileRemoveTarget = "localStorageRelativePath";
 	string fileNameShare = "localStorageRelativePath";
@@ -418,10 +418,10 @@ public class DebugController : MonoBehaviour {
 
 		if (GUI.Button (new Rect(5,95,320,20), "FileShareAll")) GalaxyManager.Instance.Storage.ShareAllFilesFromLocalStorage();
 
-		if (GUI.Button (new Rect(5,120,160,20), "FileDownloadBySharedFileID")) DownloadFileBySharedID(fileSharedID);
+		if (GUI.Button (new Rect(5,120,160,20), "DownloadBySharedFileID")) DownloadFileBySharedID(fileSharedID);
 		fileSharedID = GUI.TextField(new Rect(170,120,160,20),fileSharedID);
 
-		if (GUI.Button (new Rect(5,145,160,20), "FileDownloadByNameAndUser")) DownloadFileFromUser(fileNameDownload,userIDDownload);
+		if (GUI.Button (new Rect(5,145,160,20), "DownloadByNameAndUserID")) DownloadFileFromUser(fileNameDownload,userIDDownload);
 		fileNameDownload = GUI.TextField(new Rect(170,145,77.5f,20),fileNameDownload);
 		userIDDownload = GUI.TextField(new Rect(252.5f,145,77.5f,20),userIDDownload);
 
@@ -447,12 +447,8 @@ public class DebugController : MonoBehaviour {
 
 		if (GUI.Button(new Rect(5,195,320,20),"Open Local Storage Dir")) 
 		{
-#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
 			string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + "/GOG.com/Galaxy/Applications/50225266424144145/Storage/Shared/Files";
-			System.Diagnostics.Process.Start(path);
-#elif (UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX)
-			Debug.Log("What is the path on macOS??");
-#endif
+			System.Diagnostics.Process.Start("file://" + path);
 		}
 		GUI.DragWindow();
 	}
@@ -461,14 +457,14 @@ public class DebugController : MonoBehaviour {
 	{
 		ulong sharedFileIDUlong;
 		sharedFileIDUlong = ulong.Parse(sharedFileIDString);
-		GalaxyManager.Instance.Storage.DownloadSharedFile(sharedFileIDUlong);
+		GalaxyManager.Instance.Storage.DownloadSharedFileBySharedFileID(sharedFileIDUlong);
 	}
 
 	private void DownloadFileFromUser(string fileName, string stringGalaxyID) 
 	{
 		Galaxy.Api.GalaxyID realGalaxyID;
 		realGalaxyID = new Galaxy.Api.GalaxyID(ulong.Parse(stringGalaxyID));
-		GalaxyManager.Instance.Storage.DownloadSharedFileFromUser(realGalaxyID,fileName);
+		GalaxyManager.Instance.Storage.DownloadSharedFileByUserIdAndFileName(realGalaxyID,fileName);
 	}
 
 	/****************
